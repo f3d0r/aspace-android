@@ -9,9 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".OnboardingActivity" />
-        <activity android:name=".SplashScreen">
+        <activity android:name="aspace.trya.MainActivity" />
+        <activity android:name="aspace.trya.OnboardingActivity" />
+        <activity android:name="aspace.trya.SplashScreen">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

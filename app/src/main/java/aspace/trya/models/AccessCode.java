@@ -10,26 +10,26 @@ public class AccessCode {
     @JsonProperty("expiry")
     private String expiry;
 
-    public String getAccessCode() {
-        return accessCode;
-    }
-
     public void setAccessCode(String accessCode) {
         this.accessCode = accessCode;
     }
 
-    public String getExpiry() {
-        return expiry;
+    public String getAccessCode() {
+        return accessCode;
     }
 
     public void setExpiry(String expiry) {
         this.expiry = expiry;
     }
 
+    public String getExpiry() {
+        return expiry;
+    }
+
     @Override
     public String toString() {
         return
-                "AccessCode{" +
+                "ResContent{" +
                         "access_code = '" + accessCode + '\'' +
                         ",expiry = '" + expiry + '\'' +
                         "}";

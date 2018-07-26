@@ -39,11 +39,10 @@ public class ResponseInfo {
 
     @Override
     public String toString() {
-        return
-                "ResInfo{" +
-                        "missing_parameter = '" + missingParameter + '\'' +
-                        ",code = '" + code + '\'' +
-                        ",code_info = '" + codeInfo + '\'' +
-                        "}";
+        return "ResponseInfo{" +
+                "missingParameter='" + missingParameter + '\'' +
+                ", code=" + code +
+                ", codeInfo='" + codeInfo + '\'' +
+                '}';
     }
 }

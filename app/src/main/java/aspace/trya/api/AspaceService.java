@@ -10,34 +10,36 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
+import retrofit2.http.Query;
 
-public interface AspaceClient {
+public interface AspaceService {
     // Authentication Endpoints
     @GET("auth/ping")
     Call<AuthResponse> authPing();
 
     @POST("auth/phone_login")
-    Call<AuthResponse> phoneLogin(@Path("phone_number") String phoneNumber, @Path("device_id") String devideId);
+    Call<AuthResponse> phoneLogin(@Query("phone_number") String phoneNumber, @Query("device_id") String deviceId, @Query("call_verify") String placeCall);
 
     @POST("auth/check_pin")
-    Call<AuthResponse> checkPin(@Path("phone_number") String phoneNumber, @Path("device_id") String deviceID, @Path("verify_pin") String verifyPIN);
+    Call<AuthResponse> checkPin(@Query("phone_number") String phoneNumber, @Query("device_id") String deviceID, @Query("verify_pin") String verifyPIN);
+
 
     //Parking Endpoints
     @GET("parking/ping")
     Call<ParkingResponse> parkingPing();
 
     @GET("parking/get_status")
-    Call<ParkingResponse> getStatusByID(@Path("spot_id") String spotID, @Path("block_id") String blockID);
+    Call<ParkingResponse> getStatusByID(@Query("spot_id") String spotID, @Query("block_id") String blockID);
 
     @POST("parking/get_status_bbox")
     Call<ParkingResponse> getStatusByBbox(@Body BoundingBox boundingBox);
 
     @POST("parking/get_status_radius")
-    Call<ParkingResponse> getStatusByRadius(@Body LngLat lngLat, @Path("radius_feet") double radiusFeet);
+    Call<ParkingResponse> getStatusByRadius(@Body LngLat lngLat, @Query("radius_feet") double radiusFeet);
 
     @POST("parking/get_min_size_parking")
-    Call<ParkingResponse> getMinSizedParkingRadius(@Body LngLat lngLat, @Path("radius_feet") double radiusFeet, @Path("spot_size_feet") double spotSizeFeet);
+    Call<ParkingResponse> getMinSizedParkingRadius(@Body LngLat lngLat, @Query("radius_feet") double radiusFeet, @Query("spot_size_feet") double spotSizeFeet);
+
 
     //Routing Endpoints
     @POST("routing/get_route_waypoints")

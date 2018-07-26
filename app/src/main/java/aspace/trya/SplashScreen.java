@@ -5,9 +5,12 @@ import android.content.Intent;
 import com.viksaa.sssplash.lib.activity.AwesomeSplash;
 import com.viksaa.sssplash.lib.model.ConfigSplash;
 
+import io.realm.Realm;
 import timber.log.Timber;
 
 public class SplashScreen extends AwesomeSplash {
+
+    private Realm realm;
 
     @Override
     public void initSplash(ConfigSplash configSplash) {
@@ -35,9 +38,24 @@ public class SplashScreen extends AwesomeSplash {
 
     public void loadLibraries() {
         Timber.plant(new Timber.DebugTree());
+//        Realm.init(this);
+//
+//        byte[] key = new byte[64];
+//        new SecureRandom().nextBytes(key);
+//
+//        RealmConfiguration config = new RealmConfiguration.Builder()
+//                .name("aspace.realm")
+//                .encryptionKey(key)
+//                .schemaVersion(42)
+//                .build();
+//
+//        realm = Realm.getInstance(config);
     }
 
     public boolean userLoggedIn() {
         return false;
+//        RealmQuery<AccessCode> query = realm.where(AccessCode.class);
+//        RealmResults<AccessCode> accessCodes = query.findAll();
+//        return !accessCodes.isEmpty();
     }
 }

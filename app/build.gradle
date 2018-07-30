@@ -74,12 +74,6 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
-    // Emojis
-    implementation('io.github.rockerhieu:emojicon:1.4.2') {
-        exclude group: 'com.android.support'
-        exclude group: 'support-v7'
-    }
-
     // CameraView
     implementation 'com.wonderkiln:camerakit:0.13.1'
 

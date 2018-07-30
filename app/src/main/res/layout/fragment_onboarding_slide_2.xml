@@ -16,10 +16,10 @@
         android:text="\ue008 \ue01b"
         android:textSize="52sp" />
 
-    <com.wonderkiln.camerakit.CameraView
-        android:id="@+id/camera"
-        android:layout_gravity="center"
-        android:layout_width="300dp"
-        android:layout_height="75dp"
-        android:adjustViewBounds="true" />
+    <!--<com.wonderkiln.camerakit.CameraView-->
+    <!--android:id="@+id/camera"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:layout_width="300dp"-->
+    <!--android:layout_height="75dp"-->
+    <!--android:adjustViewBounds="true" />-->
 </LinearLayout>

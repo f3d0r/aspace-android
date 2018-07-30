@@ -10,17 +10,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.hbb20.CountryCodePicker;
 
 import java.util.UUID;
 
 import aspace.trya.R;
+import aspace.trya.api.AspaceResponseCodes;
 import aspace.trya.api.AspaceService;
 import aspace.trya.api.AspaceServiceGenerator;
-import aspace.trya.models.AuthResponse;
 import aspace.trya.misc.OnApplicationStateListener;
-import aspace.trya.models.ResponseCodes;
+import aspace.trya.models.AuthResponse;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.michaelrocks.libphonenumber.android.NumberParseException;
@@ -31,7 +32,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class PhoneLoginFragment extends Fragment {
+public class LoginPhoneFragment extends Fragment {
 
     @BindView(R.id.country_code_picker)
     CountryCodePicker countryCodePicker;
@@ -44,10 +45,9 @@ public class PhoneLoginFragment extends Fragment {
 
     private OnApplicationStateListener mListener;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_phone_login, parent, false);
+        View view = inflater.inflate(R.layout.fragment_login_phone, parent, false);
         ButterKnife.bind(this, view);
 
         phoneNumberUtil = PhoneNumberUtil.createInstance(getContext());
@@ -75,42 +75,45 @@ public class PhoneLoginFragment extends Fragment {
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         phoneNumberEditText.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
+        phoneNumberEditText.requestFocus();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginButton.setEnabled(false);
-                Phonenumber.PhoneNumber phoneNumber;
-                try {
-                    phoneNumber = phoneNumberUtil.parse(phoneNumberEditText.getText().toString(), "US");
-                } catch (NumberParseException e) {
-                    phoneNumberEditText.setError("Invalid phone #");
-                    phoneNumberEditText.requestFocus();
-                    return;
-                }
+        loginButton.setOnClickListener(v -> {
+            loginButton.setEnabled(false);
+            Phonenumber.PhoneNumber phoneNumber;
+            try {
+                phoneNumber = phoneNumberUtil.parse(phoneNumberEditText.getText().toString(), "US");
+            } catch (NumberParseException e) {
+                phoneNumberEditText.setError("Invalid phone #");
+                phoneNumberEditText.requestFocus();
+                return;
+            }
 
-                if (phoneNumberEditText.getText().toString().length() != 14) {
-                    phoneNumberEditText.setError("Incomplete phone #");
-                    phoneNumberEditText.requestFocus();
-                } else if (!phoneNumberUtil.isValidNumber(phoneNumber)) {
-                    phoneNumberEditText.setError("Invalid phone #");
-                    phoneNumberEditText.requestFocus();
-                } else {
-                    AspaceService aspaceService = AspaceServiceGenerator.createService(AspaceService.class);
-                    final String deviceId = UUID.randomUUID().toString();
+            if (!phoneNumberUtil.isValidNumber(phoneNumber)) {
+                phoneNumberEditText.setError("Invalid phone #");
+                phoneNumberEditText.requestFocus();
+            } else {
+                final String deviceId = UUID.randomUUID().toString();
 
-                    Call<AuthResponse> call = aspaceService.phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
-                    call.enqueue(new Callback<AuthResponse>() {
-                        @Override
-                        public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                            mListener.phoneLoginToConfirm(phoneNumberEditText.getText().toString(), deviceId, response.body().getResponseCode() == ResponseCodes.SUCCESS_NEW_PHONE);
+                Call<AuthResponse> call = AspaceServiceGenerator.createService(AspaceService.class).phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
+                call.enqueue(new Callback<AuthResponse>() {
+                    @Override
+                    public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                        int responseCode = response.body().getResponseCode();
+                        if (responseCode == AspaceResponseCodes.INVALID_PHONE) {
+                            phoneNumberEditText.setError("Invalid phone #");
+                            phoneNumberEditText.requestFocus();
+                        } else if (responseCode == AspaceResponseCodes.NEW_PHONE || responseCode == AspaceResponseCodes.RETURNING_PHONE) {
+                            mListener.phoneLoginToConfirm(phoneNumberEditText.getText().toString(), deviceId, response.body().getResponseCode() == AspaceResponseCodes.NEW_PHONE);
+                        } else {
+                            Toast.makeText(getContext(), "Something went wrong, please restart the app.", Toast.LENGTH_SHORT).show();
                         }
+                    }
 
-                        @Override
-                        public void onFailure(Call<AuthResponse> call, Throwable t) {
-                        }
-                    });
-                }
+                    @Override
+                    public void onFailure(Call<AuthResponse> call, Throwable t) {
+                        Toast.makeText(getContext(), "Something went wrong, please restart the app.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
@@ -149,6 +152,7 @@ public class PhoneLoginFragment extends Fragment {
             } else {
                 editedFlag = false;
             }
+            loginButton.setEnabled(s.toString().length() == 14);
         }
     }
 }

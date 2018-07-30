@@ -7,8 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import java.util.HashMap;
 
-import aspace.trya.fragments.PhoneConfirmationFragment;
-import aspace.trya.fragments.PhoneLoginFragment;
+import aspace.trya.fragments.LoginPhoneFragment;
+import aspace.trya.fragments.LoginPinFragment;
 import aspace.trya.misc.OnApplicationStateListener;
 import timber.log.Timber;
 
@@ -23,10 +23,9 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
 
         applicationState = new HashMap<String, String>();
 
-        // Begin the transaction
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-        ft.replace(R.id.main_container, new PhoneLoginFragment());
+        ft.replace(R.id.main_container, new LoginPhoneFragment());
         ft.commit();
     }
 
@@ -38,15 +37,15 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
-        PhoneConfirmationFragment phoneConfirmationFragment = new PhoneConfirmationFragment();
+        LoginPinFragment loginPinFragment = new LoginPinFragment();
 
         Bundle data = new Bundle();
         data.putString("LOGIN_PHONE_NUMBER", applicationState.get("LOGIN_PHONE_NUMBER"));
         data.putString("DEVICE_ID", applicationState.get("DEVICE_ID"));
         data.putBoolean("ONBOARD", onboard);
 
-        phoneConfirmationFragment.setArguments(data);
-        ft.replace(R.id.main_container, phoneConfirmationFragment);
+        loginPinFragment.setArguments(data);
+        ft.replace(R.id.main_container, loginPinFragment);
         ft.commit();
     }
 
@@ -56,11 +55,10 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
         applicationState.remove("DEVICE_ID");
         applicationState.remove("ONBOARD");
 
-        // Begin the transaction
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
 
-        ft.replace(R.id.main_container, new PhoneLoginFragment());
+        ft.replace(R.id.main_container, new LoginPhoneFragment());
         ft.commit();
     }
 
@@ -68,10 +66,10 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
     public void continueFromLogin(String accessCode) {
         applicationState.put("ACCESS_CODE", accessCode);
         if (applicationState.get("ONBOARD").equals("true")) {
-            Timber.e("SHOULD BE ONBOARDING!");
             startActivity(new Intent(MainActivity.this, OnboardingActivity.class));
         } else {
-//            startActivity(new Intent(MapActivity.this, OnboardingActivity.class));
+            Timber.d("Onboarding done, should be sending to MapActivity");
+            startActivity(new Intent(MainActivity.this, MapActivity.class));
         }
         finish();
     }

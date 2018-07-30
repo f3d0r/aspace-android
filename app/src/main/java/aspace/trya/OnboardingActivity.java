@@ -1,5 +1,6 @@
 package aspace.trya;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,7 +9,6 @@ import com.github.paolorotolo.appintro.AppIntro2;
 
 import aspace.trya.fragments.OnboardingSlide1;
 import aspace.trya.fragments.OnboardingSlide2;
-import aspace.trya.misc.OnApplicationStateListener;
 
 
 public class OnboardingActivity extends AppIntro2 {
@@ -24,13 +24,15 @@ public class OnboardingActivity extends AppIntro2 {
     @Override
     public void onSkipPressed(Fragment currentFragment) {
         super.onSkipPressed(currentFragment);
-        // Do something when users tap on Skip button.
+        startActivity(new Intent(OnboardingActivity.this, MapActivity.class));
+        finish();
     }
 
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
-        // Do something when users tap on Done button.
+        startActivity(new Intent(OnboardingActivity.this, MapActivity.class));
+        finish();
     }
 
     @Override

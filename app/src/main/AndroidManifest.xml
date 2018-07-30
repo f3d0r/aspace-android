@@ -3,6 +3,8 @@
     package="aspace.trya">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,16 +12,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="aspace.trya.MainActivity" />
-        <activity android:name="aspace.trya.OnboardingActivity" />
-        <activity android:name="aspace.trya.SplashScreen">
-
+        <activity android:name=".MainActivity" />
+        <activity android:name=".OnboardingActivity" />
+        <activity android:name=".SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MapActivity" />
     </application>
 
 </manifest>

@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import aspace.trya.R;
-import aspace.trya.misc.OnApplicationStateListener;
 import butterknife.ButterKnife;
 
 

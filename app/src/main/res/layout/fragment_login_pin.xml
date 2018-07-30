@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFAFAFA"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_enterPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"
+        android:text="Please enter your PIN"
+        android:textSize="20sp" />
+
+    <com.alimuzaffar.lib.pin.PinEntryEditText
+        android:id="@+id/txt_pin_entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginTop="200dp"
+        android:background="@null"
+        android:cursorVisible="false"
+        android:digits="1234567890"
+        android:inputType="number"
+        android:maxLength="6"
+        android:textIsSelectable="false"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:pinAnimationType="fromBottom"
+        app:pinBackgroundDrawable="@drawable/pin_background"
+        app:pinLineStroke="2dp"
+        app:pinLineStrokeSelected="4dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:letterSpacing="0.05"
+            android:text="Haven’t received a code yet?"
+            android:textSize="16sp"
+            android:theme="@style/HavenTReceivedAC" />
+
+        <TextView
+            android:id="@+id/sendAgainButton"
+            android:layout_width="fill_parent"
+            android:layout_marginStart="25dp"
+            android:layout_height="wrap_content"
+            android:text="Send Again"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            android:theme="@style/SendAgain" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonBack"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginEnd="1dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_light_bg"
+            android:text="Back"
+            android:theme="@style/ButtonText" />
+
+        <Button
+            android:id="@+id/buttonContinue"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginStart="1dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_dark_bg"
+            android:text="Next"
+            android:theme="@style/ButtonText" />
+
+    </LinearLayout>
+
+</LinearLayout>

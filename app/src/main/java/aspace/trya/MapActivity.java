@@ -23,6 +23,7 @@ public class MapActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+
         Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));
 
         mapView = findViewById(R.id.mapView);

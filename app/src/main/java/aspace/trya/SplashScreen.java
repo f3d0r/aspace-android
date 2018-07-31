@@ -24,14 +24,15 @@ public class SplashScreen extends AwesomeSplash {
     @Override
     public void animationsFinished() {
         loadLibraries();
-
+//        First activity intent is for debugging
+//        Intent mainActivityIntent = new Intent(SplashScreen.this, MapActivity.class);
         Intent mainActivityIntent = new Intent(SplashScreen.this, MainActivity.class);
-        if (userLoggedIn()) {
-//            send user to to home page/map
-        } else {
-
-//            send user to login/sign-up page
-        }
+//        if (userLoggedIn()) {
+////            send user to to home page/map
+//        } else {
+//
+////            send user to login/sign-up page
+//        }
         startActivity(mainActivityIntent);
         finish();
     }

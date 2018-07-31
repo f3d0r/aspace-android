@@ -2,5 +2,5 @@
     <string name="app_name" tools:override="true">aspace</string>
     <string name="straight_to_map"><u>Go straight to map!</u></string>
 
-    <string name="mapbox_access_token">pk.eyJ1IjoiYXNwYWNlLWluYyIsImEiOiJjams4dDloMXgwMzBxM3FtaXlqMmxmcHNqIn0.29wZDCJm9UMtFfuqGPZOpA</string>
+    <string name="mapbox_access_token">***REMOVED***</string>
 </resources>

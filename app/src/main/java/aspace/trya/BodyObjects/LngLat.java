@@ -7,8 +7,8 @@ public class LngLat {
     private double lat;
 
     public LngLat(String lngLat) {
-        this.lng = Double.parseDouble(lngLat.substring(0, lngLat.indexOf('.')));
-        this.lat = Double.parseDouble((lngLat.substring(lngLat.indexOf('.') + 1, lngLat.length())));
+        this.lng = Double.parseDouble(lngLat.substring(0, lngLat.indexOf(',')));
+        this.lat = Double.parseDouble((lngLat.substring(lngLat.indexOf(',') + 1, lngLat.length())));
     }
 
     public double getLng() {
@@ -35,4 +35,5 @@ public class LngLat {
                         ",lat = '" + lat + '\'' +
                         "}";
     }
+
 }

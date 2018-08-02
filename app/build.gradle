@@ -82,6 +82,7 @@ dependencies {
 
     // Mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.3.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.7.1'
 
     implementation 'com.android.support:support-annotations:27.1.1'
 
@@ -95,8 +96,11 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:design:27.1.1'
 
-    //Floating Search View
+    // Floating Search View
     implementation 'com.github.arimorty:floatingsearchview:2.1.1'
+
+    // Check permissions
+    implementation 'com.karumi:dexter:5.0.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

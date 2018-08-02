@@ -1,5 +1,6 @@
 package aspace.trya.geojson;
 
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+@SuppressLint("ParcelCreator")
 public class Feature implements SearchSuggestion {
 
     @JsonProperty("place_name")

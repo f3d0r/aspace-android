@@ -30,10 +30,9 @@ public class ParkingResponse {
 
     @Override
     public String toString() {
-        return
-                "ParkingResponse{" +
-                        "res_info = '" + responseInfo + '\'' +
-                        ",res_content = '" + parkingSpots + '\'' +
-                        "}";
+        return "ParkingResponse{" +
+                "responseInfo=" + responseInfo +
+                ", parkingSpots=" + parkingSpots +
+                '}';
     }
 }

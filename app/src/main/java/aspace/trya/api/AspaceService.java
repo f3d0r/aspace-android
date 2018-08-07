@@ -1,8 +1,8 @@
 package aspace.trya.api;
 
-import aspace.trya.BodyObjects.BoundingBox;
-import aspace.trya.BodyObjects.LngLat;
-import aspace.trya.BodyObjects.WaypointSearch;
+import aspace.trya.bodyobjects.BoundingBox;
+import aspace.trya.bodyobjects.LngLat;
+import aspace.trya.bodyobjects.WaypointSearch;
 import aspace.trya.models.AuthResponse;
 import aspace.trya.models.ParkingResponse;
 import aspace.trya.models.RoutingResponse;

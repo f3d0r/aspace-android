@@ -30,10 +30,9 @@ public class RoutingResponse {
 
     @Override
     public String toString() {
-        return
-                "RoutingResponse{" +
-                        "res_info = '" + responseInfo + '\'' +
-                        ",res_content = '" + waypoints + '\'' +
-                        "}";
+        return "RoutingResponse{" +
+                "responseInfo=" + responseInfo +
+                ", waypoints=" + waypoints +
+                '}';
     }
 }

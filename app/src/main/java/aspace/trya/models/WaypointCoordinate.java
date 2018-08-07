@@ -2,7 +2,7 @@ package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import aspace.trya.BodyObjects.LngLat;
+import aspace.trya.bodyobjects.LngLat;
 
 public class WaypointCoordinate {
 
@@ -56,12 +56,11 @@ public class WaypointCoordinate {
 
     @Override
     public String toString() {
-        return
-                "ResContentItem{" +
-                        "coord = '" + coord + '\'' +
-                        ",optimal_spot_id = '" + optimalSpotId + '\'' +
-                        ",price = '" + price + '\'' +
-                        ",time = '" + time + '\'' +
-                        "}";
+        return "WaypointCoordinate{" +
+                "coord='" + coord + '\'' +
+                ", optimalSpotId=" + optimalSpotId +
+                ", price=" + price +
+                ", time=" + time +
+                '}';
     }
 }

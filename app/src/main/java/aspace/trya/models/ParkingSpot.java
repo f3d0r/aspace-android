@@ -72,14 +72,13 @@ public class ParkingSpot {
 
     @Override
     public String toString() {
-        return
-                "ParkingSpot{" +
-                        "lng = '" + lng + '\'' +
-                        ",spot_id = '" + spotId + '\'' +
-                        ",lat = '" + lat + '\'' +
-                        ",occupied = '" + occupied + '\'' +
-                        ",block_id = '" + blockId + '\'' +
-                        ",parking_price = '" + parkingPrice + '\'' +
-                        "}";
+        return "ParkingSpot{" +
+                "lng=" + lng +
+                ", spotId=" + spotId +
+                ", lat=" + lat +
+                ", occupied='" + occupied + '\'' +
+                ", blockId=" + blockId +
+                ", parkingPrice=" + parkingPrice +
+                '}';
     }
 }

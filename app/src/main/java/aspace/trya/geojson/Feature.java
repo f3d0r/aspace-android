@@ -2,6 +2,8 @@ package aspace.trya.geojson;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 
 import java.util.List;
 
@@ -145,5 +147,20 @@ public class Feature {
                         ",properties = '" + properties + '\'' +
                         ",bbox = '" + bbox + '\'' +
                         "}";
+    }
+
+    public boolean hasBbox() {
+        return getBbox() != null && getBbox().size() != 0;
+    }
+
+    public LatLngBounds getLatLngBounds() {
+        if (getBbox() == null || getBbox().size() == 0) {
+            return null;
+        } else {
+            return new LatLngBounds.Builder()
+                    .include(new LatLng(getBbox().get(1), getBbox().get(0)))
+                    .include(new LatLng(getBbox().get(3), getBbox().get(2)))
+                    .build();
+        }
     }
 }

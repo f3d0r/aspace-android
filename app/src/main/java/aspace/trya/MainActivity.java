@@ -9,8 +9,9 @@ import java.util.HashMap;
 
 import aspace.trya.fragments.LoginPhoneFragment;
 import aspace.trya.fragments.LoginPinFragment;
+import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.OnApplicationStateListener;
-import timber.log.Timber;
+import aspace.trya.models.AccessCode;
 
 public class MainActivity extends AppCompatActivity implements OnApplicationStateListener {
 
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        applicationState = new HashMap<String, String>();
+        applicationState = new HashMap<>();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
@@ -63,12 +64,12 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
     }
 
     @Override
-    public void continueFromLogin(String accessCode) {
-        applicationState.put("ACCESS_CODE", accessCode);
+    public void continueFromLogin(AccessCode accessCode) {
+        ApplicationState.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode, applicationState.get("DEVICE_ID"));
+        applicationState.put("ACCESS_CODE", accessCode.getAccessCode());
         if (applicationState.get("ONBOARD").equals("true")) {
             startActivity(new Intent(MainActivity.this, OnboardingActivity.class));
         } else {
-            Timber.d("Onboarding done, should be sending to MapActivity");
             startActivity(new Intent(MainActivity.this, MapActivity.class));
         }
         finish();

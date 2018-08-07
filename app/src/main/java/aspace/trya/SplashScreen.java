@@ -12,7 +12,9 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import com.viksaa.sssplash.lib.activity.AwesomeSplash;
 import com.viksaa.sssplash.lib.model.ConfigSplash;
 
+import aspace.trya.realm.AppUser;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import timber.log.Timber;
 
 public class SplashScreen extends AwesomeSplash {
@@ -31,49 +33,43 @@ public class SplashScreen extends AwesomeSplash {
     @Override
     public void animationsFinished() {
         loadLibraries();
-        checkPermissions();
-//        First activity intent is for debugging
-//        Intent mainActivityIntent = new Intent(SplashScreen.this, MainActivity.class);
-//        if (userLoggedIn()) {
-////            send user to to home page/map
-//        } else {
-//
-////            send user to login/sign-up page
-//        }
+        initRealm();
+        if (userLoggedIn()) {
+            checkPermissions(MapActivity.class);
+        } else {
+            checkPermissions(MainActivity.class);
+        }
     }
 
     public void loadLibraries() {
         Timber.plant(new Timber.DebugTree());
-//        Realm.init(this);
-//
-//        byte[] key = new byte[64];
-//        new SecureRandom().nextBytes(key);
-//
-//        RealmConfiguration config = new RealmConfiguration.Builder()
-//                .name("aspace.realm")
-//                .encryptionKey(key)
-//                .schemaVersion(42)
-//                .build();
-//
-//        realm = Realm.getInstance(config);
     }
+
+    public void initRealm() {
+        Realm.init(this);
+
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .schemaVersion(42)
+                .build();
+
+        realm = Realm.getInstance(config);
+    }
+
 
     public boolean userLoggedIn() {
-        return false;
-//        RealmQuery<AccessCode> query = realm.where(AccessCode.class);
-//        RealmResults<AccessCode> accessCodes = query.findAll();
-//        return !accessCodes.isEmpty();
+        return !realm.where(AppUser.class).findAll().isEmpty();
     }
 
-    public void checkPermissions() {
+    public void checkPermissions(Class throughClass) {
         boolean permissionsExist = true;
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
-                        Intent mainActivityIntent = new Intent(SplashScreen.this, MapActivity.class);
+                        Intent mainActivityIntent = new Intent(SplashScreen.this, throughClass);
                         startActivity(mainActivityIntent);
+                        finish();
                     }
 
                     @Override

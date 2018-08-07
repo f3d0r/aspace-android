@@ -111,7 +111,6 @@ public class LoginPhoneFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
-                        Toast.makeText(getContext(), "Something went wrong, please restart the app.", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

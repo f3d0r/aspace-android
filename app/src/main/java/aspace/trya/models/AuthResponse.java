@@ -18,14 +18,6 @@ public class AuthResponse {
         return responseInfo;
     }
 
-    @Override
-    public String toString() {
-        return "AuthResponse{" +
-                "responseInfo=" + responseInfo +
-                ", accessCode=" + accessCode +
-                '}';
-    }
-
     public AccessCode getAccessCode() {
         return accessCode;
     }
@@ -36,5 +28,13 @@ public class AuthResponse {
 
     public int getResponseCode() {
         return responseInfo.getCode();
+    }
+
+    @Override
+    public String toString() {
+        return "AuthResponse{" +
+                "responseInfo=" + responseInfo +
+                ", accessCode=" + accessCode +
+                '}';
     }
 }

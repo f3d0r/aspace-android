@@ -1,4 +1,4 @@
-package aspace.trya.BodyObjects;
+package aspace.trya.bodyobjects;
 
 public class LngLat {
 

@@ -2,6 +2,7 @@ package aspace.trya;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,6 +28,8 @@ import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -40,6 +43,8 @@ import aspace.trya.api.MapboxService;
 import aspace.trya.api.MapboxServiceGenerator;
 import aspace.trya.geojson.Feature;
 import aspace.trya.geojson.GeoJSON;
+import aspace.trya.misc.ApplicationState;
+import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -211,14 +216,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         sheetBehavior.setPeekHeight(150);
     }
 
-    public void zoomToFeature(Feature feature) {
+    public void zoomToLatLng(LatLng latLng) {
         CameraPosition position = new CameraPosition.Builder()
-                .target(feature.getGeometry().getLatLng())
+                .target(latLng)
                 .zoom(17) // Sets the zoom
                 .build(); // Creates a CameraPosition from the builder
 
         mapboxMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(position), 3000);
+                .newCameraPosition(position), 5000);
+    }
+
+    public void zoomToBbox(LatLngBounds latLngBounds) {
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), 5000);
     }
 
     @Override
@@ -266,6 +275,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 floatingSearchView.setText("");
                 floatingSearchView.setActivated(false);
                 return true;
+            case R.id.logout_menu_item:
+                ApplicationState.logout();
+                startActivity(new Intent(MapActivity.this, MainActivity.class));
+                finish();
             default:
                 return false;
         }
@@ -302,18 +315,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         ImageView locationType, goButton;
         TextView mainAddress, cityState;
 
-        public SuggestionViewHolder(final View itemView) {
+        SuggestionViewHolder(final View itemView) {
             super(itemView);
             locationType = itemView.findViewById(R.id.location_type_iv);
             goButton = itemView.findViewById(R.id.go_iv);
             mainAddress = itemView.findViewById(R.id.main_address_tv);
             cityState = itemView.findViewById(R.id.city_state_tv);
-            itemView.findViewById(R.id.address_layout).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    floatingSearchView.setActivated(false);
-                    floatingSearchView.setText(mAdapter.getItem(getAdapterPosition()).getFeature().getPlaceName());
-                    zoomToFeature(mAdapter.getItem(getAdapterPosition()).getFeature());
+            itemView.findViewById(R.id.address_layout).setOnClickListener(v -> {
+                KeyboardUtils.hideSoftKeyboard(getCurrentFocus(), getSystemService(INPUT_METHOD_SERVICE));
+
+                sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                floatingSearchView.setActivated(false);
+
+                Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
+                floatingSearchView.setText(clickedFeature.getPlaceName());
+                mAdapter.clear();
+                if (clickedFeature.hasBbox()) {
+                    zoomToBbox(clickedFeature.getLatLngBounds());
+                } else {
+                    zoomToLatLng(clickedFeature.getGeometry().getLatLng());
                 }
             });
         }

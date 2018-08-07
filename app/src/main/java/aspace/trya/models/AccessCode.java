@@ -2,13 +2,15 @@ package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AccessCode {
+import io.realm.RealmObject;
+
+public class AccessCode extends RealmObject {
 
     @JsonProperty("access_code")
-    private String accessCode;
+    public String accessCode;
 
     @JsonProperty("expiry")
-    private String expiry;
+    public String expiry;
 
     public void setAccessCode(String accessCode) {
         this.accessCode = accessCode;
@@ -26,12 +28,14 @@ public class AccessCode {
         return expiry;
     }
 
+    public AccessCode() {
+    }
+
     @Override
     public String toString() {
-        return
-                "ResContent{" +
-                        "access_code = '" + accessCode + '\'' +
-                        ",expiry = '" + expiry + '\'' +
-                        "}";
+        return "AccessCode{" +
+                "accessCode='" + accessCode + '\'' +
+                ", expiry='" + expiry + '\'' +
+                '}';
     }
 }

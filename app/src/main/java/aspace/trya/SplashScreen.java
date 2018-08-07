@@ -72,7 +72,7 @@ public class SplashScreen extends AwesomeSplash {
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
-                        Intent mainActivityIntent = new Intent(SplashScreen.this, MainActivity.class);
+                        Intent mainActivityIntent = new Intent(SplashScreen.this, MapActivity.class);
                         startActivity(mainActivityIntent);
                     }
 

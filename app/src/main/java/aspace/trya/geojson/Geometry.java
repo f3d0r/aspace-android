@@ -1,9 +1,12 @@
 package aspace.trya.geojson;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Geometry {
 
     @JsonProperty("coordinates")
@@ -12,46 +15,20 @@ public class Geometry {
     @JsonProperty("type")
     private String type;
 
-    @JsonProperty("interpolated")
-    private boolean interpolated;
-
-    @JsonProperty("omitted")
-    private boolean omitted;
-
-    private List<Double> getCoordinates() {
-        return coordinates;
-    }
-
     public void setCoordinates(List<Double> coordinates) {
         this.coordinates = coordinates;
     }
 
-    public String getType() {
-        return type;
+    public List<Double> getCoordinates() {
+        return coordinates;
     }
 
     public void setType(String type) {
         this.type = type;
     }
 
-    public boolean isInterpolated() {
-        return interpolated;
-    }
-
-    public void setInterpolated(boolean interpolated) {
-        this.interpolated = interpolated;
-    }
-
-    public boolean isOmitted() {
-        return omitted;
-    }
-
-    public void setOmitted(boolean omitted) {
-        this.omitted = omitted;
-    }
-
-    public String getCoordinatesString() {
-        return getCoordinates().get(0) + "," + getCoordinates().get(1);
+    public String getType() {
+        return type;
     }
 
     @Override
@@ -60,8 +37,10 @@ public class Geometry {
                 "Geometry{" +
                         "coordinates = '" + coordinates + '\'' +
                         ",type = '" + type + '\'' +
-                        ",interpolated = '" + interpolated + '\'' +
-                        ",omitted = '" + omitted + '\'' +
                         "}";
+    }
+
+    public LatLng getLatLng() {
+        return new LatLng(getCoordinates().get(1), getCoordinates().get(0));
     }
 }

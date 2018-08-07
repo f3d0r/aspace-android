@@ -1,7 +1,9 @@
 package aspace.trya.geojson;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Context {
 
     @JsonProperty("id")
@@ -16,36 +18,36 @@ public class Context {
     @JsonProperty("short_code")
     private String shortCode;
 
-    public String getId() {
-        return id;
-    }
-
     public void setId(String id) {
         this.id = id;
     }
 
-    public String getText() {
-        return text;
+    public String getId() {
+        return id;
     }
 
     public void setText(String text) {
         this.text = text;
     }
 
-    public String getWikidata() {
-        return wikidata;
+    public String getText() {
+        return text;
     }
 
     public void setWikidata(String wikidata) {
         this.wikidata = wikidata;
     }
 
-    public String getShortCode() {
-        return shortCode;
+    public String getWikidata() {
+        return wikidata;
     }
 
     public void setShortCode(String shortCode) {
         this.shortCode = shortCode;
+    }
+
+    public String getShortCode() {
+        return shortCode;
     }
 
     @Override

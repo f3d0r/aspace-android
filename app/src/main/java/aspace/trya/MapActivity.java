@@ -2,11 +2,12 @@ package aspace.trya;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.RecyclerView;
@@ -23,8 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -33,9 +33,6 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mypopsy.widget.FloatingSearchView;
 
 import aspace.trya.adapter.ArrayRecyclerAdapter;
@@ -45,6 +42,7 @@ import aspace.trya.geojson.Feature;
 import aspace.trya.geojson.GeoJSON;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
+import aspace.trya.misc.LocationUtils;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -53,14 +51,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener {
-
-    @BindView(R.id.mapView)
+    @BindView(R.id.map_view)
     MapView mapView;
     @BindView(R.id.floating_search_view)
     FloatingSearchView floatingSearchView;
     @BindView(R.id.bottom_sheet)
     LinearLayout layoutBottomSheet;
-
+    @BindView(R.id.current_location_button)
+    FloatingActionButton btCurrentLocation;
     @BindView(R.id.bike_route_cost)
     TextView tvBikeRouteCost;
     @BindView(R.id.bike_route_time)
@@ -73,7 +71,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     TextView tvWalkRouteCost;
     @BindView(R.id.walk_route_time)
     TextView tvRouteWalkTime;
-
     @BindView(R.id.bike_route)
     RelativeLayout rlBikeRoute;
     @BindView(R.id.drive_route)
@@ -81,21 +78,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @BindView(R.id.walk_route)
     RelativeLayout rlWalkRoute;
 
-    MenuItem menuItemClearSearch;
-
     Menu menuSearchView;
+    MenuItem menuItemClearSearch;
 
     @BindView(R.id.start_route_button)
     Button btStartRoute;
 
     BottomSheetBehavior sheetBehavior;
     private MapboxMap mapboxMap;
-    private PermissionsManager permissionsManager;
-    private LocationLayerPlugin locationPlugin;
-    private LocationEngine locationEngine;
-    private Location originLocation;
 
     private SearchAdapter mAdapter;
+
+    private LocationUtils locationUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +109,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         sheetBehavior = BottomSheetBehavior.from(layoutBottomSheet);
         sheetBehavior.setPeekHeight(0);
 
-        mapView = findViewById(R.id.mapView);
+        mapView = findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
@@ -193,10 +187,41 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        locationPlugin = new LocationLayerPlugin(mapView, this.mapboxMap);
-        locationPlugin.setRenderMode(RenderMode.COMPASS);
-        locationPlugin.setCameraMode(CameraMode.TRACKING);
-//        UiSettings settings = new UiSettings()
+        initLocationListener();
+        mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
+        btCurrentLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (locationUtils.isCurrentLocationTracked()) {
+                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
+                    locationUtils.stopCurrentLocationMapMover();
+                } else {
+                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_enabled);
+                    locationUtils.startCurrentLocationMapMover(2000);
+                }
+            }
+        });
+
+        mapboxMap.addOnMoveListener(new MapboxMap.OnMoveListener() {
+            @Override
+            public void onMoveBegin(@NonNull MoveGestureDetector detector) {
+            }
+
+            @Override
+            public void onMove(@NonNull MoveGestureDetector detector) {
+                locationUtils.stopCurrentLocationMapMover();
+                btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
+            }
+
+            @Override
+            public void onMoveEnd(@NonNull MoveGestureDetector detector) {
+            }
+        });
+    }
+
+    public void initLocationListener() {
+        locationUtils = new LocationUtils(getSystemService(Context.LOCATION_SERVICE), mapboxMap, this, this);
+
     }
 
     public void summaryViewTransition() {
@@ -216,18 +241,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         sheetBehavior.setPeekHeight(150);
     }
 
-    public void zoomToLatLng(LatLng latLng) {
+    public void zoomToLatLng(LatLng latLng, int animMilli) {
         CameraPosition position = new CameraPosition.Builder()
                 .target(latLng)
                 .zoom(17) // Sets the zoom
                 .build(); // Creates a CameraPosition from the builder
 
         mapboxMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(position), 5000);
+                .newCameraPosition(position), animMilli);
     }
 
-    public void zoomToBbox(LatLngBounds latLngBounds) {
-        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), 5000);
+    public void zoomToBbox(LatLngBounds latLngBounds, int animMilli) {
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), animMilli);
     }
 
     @Override
@@ -331,9 +356,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 floatingSearchView.setText(clickedFeature.getPlaceName());
                 mAdapter.clear();
                 if (clickedFeature.hasBbox()) {
-                    zoomToBbox(clickedFeature.getLatLngBounds());
+                    zoomToBbox(clickedFeature.getLatLngBounds(), 4000);
                 } else {
-                    zoomToLatLng(clickedFeature.getGeometry().getLatLng());
+                    zoomToLatLng(clickedFeature.getGeometry().getLatLng(), 3000);
                 }
             });
         }

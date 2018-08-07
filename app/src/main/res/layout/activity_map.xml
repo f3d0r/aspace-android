@@ -9,27 +9,43 @@
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
     tools:context=".MapActivity">
 
-    <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        mapbox:mapbox_styleUrl="@string/mapbox_style_mapbox_streets" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-    <com.mypopsy.widget.FloatingSearchView
-        android:id="@+id/floating_search_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#90000000"
-        android:divider="#c9c9c9"
-        android:dividerHeight="1dp"
-        android:ellipsize="end"
-        android:hint="Where to?"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="8dp"
-        android:singleLine="true"
-        app:fsv_cornerRadius="3dp"
-        app:fsv_menu="@menu/searchview_menu" />
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/map_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            mapbox:mapbox_styleUrl="@string/mapbox_style_mapbox_streets" />
+
+        <com.mypopsy.widget.FloatingSearchView
+            android:id="@+id/floating_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#90000000"
+            android:divider="#c9c9c9"
+            android:dividerHeight="1dp"
+            android:ellipsize="end"
+            android:hint="Where to?"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="8dp"
+            android:singleLine="true"
+            app:fsv_cornerRadius="3dp"
+            app:fsv_menu="@menu/searchview_menu" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/current_location_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="end|bottom"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="20dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_current_location_disabled"
+            android:translationZ="5dp" />
+    </FrameLayout>
 
     <include layout="@layout/route_options_preview" />
 

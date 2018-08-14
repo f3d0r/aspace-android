@@ -83,6 +83,7 @@ dependencies {
     // Mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.3.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.7.1'
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:3.5.0-SNAPSHOT'
 
     implementation 'com.android.support:support-annotations:27.1.1'
     implementation 'com.android.support:appcompat-v7:27.1.1'
@@ -102,6 +103,9 @@ dependencies {
 
     // Dependency Injection
     implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
+
+    // Google Play Services
+    implementation "com.google.android.gms:play-services-location:15.0.1"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

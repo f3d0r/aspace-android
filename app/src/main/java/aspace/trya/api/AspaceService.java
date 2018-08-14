@@ -4,6 +4,7 @@ import aspace.trya.bodyobjects.BoundingBox;
 import aspace.trya.bodyobjects.LngLat;
 import aspace.trya.bodyobjects.WaypointSearch;
 import aspace.trya.models.AuthResponse;
+import aspace.trya.models.CodeResponse;
 import aspace.trya.models.ParkingResponse;
 import aspace.trya.models.RoutingResponse;
 import retrofit2.Call;
@@ -23,6 +24,8 @@ public interface AspaceService {
     @POST("auth/check_pin")
     Call<AuthResponse> checkPin(@Query("phone_number") String phoneNumber, @Query("device_id") String deviceID, @Query("verify_pin") String verifyPIN);
 
+    @GET("user/check_auth")
+    Call<CodeResponse> checkAuth(@Query("access_code") String accessCode, @Query("device_id") String deviceID);
 
     //Parking Endpoints
     @GET("parking/ping")
@@ -39,7 +42,6 @@ public interface AspaceService {
 
     @POST("parking/get_min_size_parking")
     Call<ParkingResponse> getMinSizedParkingRadius(@Body LngLat lngLat, @Query("radius_feet") double radiusFeet, @Query("spot_size_feet") double spotSizeFeet);
-
 
     //Routing Endpoints
     @POST("routing/get_route_waypoints")

@@ -37,15 +37,19 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/current_location_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="end|bottom"
             android:layout_marginBottom="20dp"
             android:layout_marginRight="20dp"
             android:scaleType="center"
-            android:src="@drawable/ic_current_location_disabled"
-            android:translationZ="5dp" />
+            android:src="@drawable/ic_current_location_disabled" />
     </FrameLayout>
+
+    <include
+        android:id="@+id/address_view_fragment"
+        layout="@layout/fragment_address_view"
+        android:visibility="invisible" />
 
     <include layout="@layout/route_options_preview" />
 

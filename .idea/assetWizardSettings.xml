@@ -3,6 +3,11 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+        <entry key="imageWizard">
+          <value>
+            <PersistentState />
+          </value>
+        </entry>
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -14,9 +19,9 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_current_location_disabled" />
+                            <entry key="outputName" value="ic_directions_parking" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="$USER_HOME$/Downloads/baseline-location_searching-24px (1).svg" />
+                            <entry key="sourceFile" value="$USER_HOME$/Downloads/baseline-local_parking-24px.svg" />
                           </map>
                         </option>
                       </PersistentState>

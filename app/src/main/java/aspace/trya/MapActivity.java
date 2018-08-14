@@ -2,7 +2,6 @@ package aspace.trya;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -35,22 +34,26 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mypopsy.widget.FloatingSearchView;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import aspace.trya.adapter.ArrayRecyclerAdapter;
 import aspace.trya.api.MapboxService;
 import aspace.trya.api.MapboxServiceGenerator;
+import aspace.trya.api.RetrofitLatLng;
 import aspace.trya.geojson.Feature;
 import aspace.trya.geojson.GeoJSON;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
-import aspace.trya.misc.LocationUtils;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener, View.OnFocusChangeListener {
     @BindView(R.id.map_view)
     MapView mapView;
     @BindView(R.id.floating_search_view)
@@ -79,26 +82,28 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     RelativeLayout rlWalkRoute;
 
     Menu menuSearchView;
-    MenuItem menuItemClearSearch;
 
     @BindView(R.id.start_route_button)
     Button btStartRoute;
+
+    @BindView(R.id.address_view_fragment)
+    LinearLayout llAddressViewFragment;
 
     BottomSheetBehavior sheetBehavior;
     private MapboxMap mapboxMap;
 
     private SearchAdapter mAdapter;
 
-    private LocationUtils locationUtils;
+    private LatLng beginLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        beginLocation = new LatLng(getIntent().getDoubleExtra("currentLocLat", 0), getIntent().getDoubleExtra("currentLocLon", 0));
+        Timber.w("LATLNG BEGIN : " + beginLocation);
         setContentView(R.layout.activity_map);
 
         ButterKnife.bind(this);
-
-        menuItemClearSearch = findViewById(R.id.clear_search_menu_item);
 
         rlBikeRoute.setOnClickListener(this);
         rlDriveRoute.setOnClickListener(this);
@@ -117,42 +122,56 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         floatingSearchView.setOnSearchListener(text -> floatingSearchView.setActivated(false));
 
         floatingSearchView.addTextChangedListener(new TextWatcher() {
+            private final long DELAY = 500; // milliseconds
+            private Timer timer = new Timer();
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                floatingSearchView.getMenu().getItem(0).setVisible(s.toString().length() != 0);
-                if (floatingSearchView.getText().length() == 0) {
-                    mAdapter.clear();
-                }
-                String searchString = s.toString().replace(' ', '+').trim() + ".json";
-                Call<GeoJSON> call = MapboxServiceGenerator.createService(MapboxService.class).getSearchSuggestions(searchString, "-122.3120,47.6187", "us", getString(R.string.mapbox_access_token), 10);
-                call.enqueue(new Callback<GeoJSON>() {
-                    @Override
-                    public void onResponse(@NonNull Call<GeoJSON> call, @NonNull Response<GeoJSON> response) {
-                        try {
-                            assert response.body() != null;
-                            mAdapter.setNotifyOnChange(false);
-                            mAdapter.clear();
-                            mAdapter.addAll(response.body().getSearchResults(getApplicationContext()));
-                            mAdapter.setNotifyOnChange(true);
-                            mAdapter.notifyDataSetChanged();
-                        } catch (NullPointerException ignored) {
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<GeoJSON> call, Throwable t) {
-                    }
-                });
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(final Editable s) {
+                timer.cancel();
+                timer = new Timer();
+                timer.schedule(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                runOnUiThread(() -> {
+                                    floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
+                                    if (floatingSearchView.getText().length() == 0) {
+                                        mAdapter.clear();
 
+                                    }
+                                    String searchString = s.toString().replace(' ', '+').trim() + ".json";
+                                    Call<GeoJSON> call = MapboxServiceGenerator.createService(MapboxService.class).getSearchSuggestions(searchString, new RetrofitLatLng(mapboxMap.getCameraPosition().target.getLatitude(), mapboxMap.getCameraPosition().target.getLongitude()), "us", getString(R.string.mapbox_access_token), 10);
+                                    call.enqueue(new Callback<GeoJSON>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<GeoJSON> call, @NonNull Response<GeoJSON> response) {
+                                            try {
+                                                assert response.body() != null;
+                                                mAdapter.setNotifyOnChange(false);
+                                                mAdapter.clear();
+                                                mAdapter.addAll(response.body().getSearchResults(getApplicationContext()));
+                                                mAdapter.setNotifyOnChange(true);
+                                                mAdapter.notifyDataSetChanged();
+                                            } catch (NullPointerException ignored) {
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<GeoJSON> call, Throwable t) {
+                                        }
+                                    });
+                                });
+                            }
+                        },
+                        DELAY
+                );
             }
         });
 
@@ -188,17 +207,23 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         initLocationListener();
+        CameraPosition position = new CameraPosition.Builder()
+                .target(beginLocation)
+                .zoom(14)
+                .build();
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
         mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
         btCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (locationUtils.isCurrentLocationTracked()) {
-                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
-                    locationUtils.stopCurrentLocationMapMover();
-                } else {
-                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_enabled);
-                    locationUtils.startCurrentLocationMapMover(2000);
-                }
+//                if (locationUtils.isCurrentLocationTracked()) {
+//                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
+//                    locationUtils.stopCurrentLocationMapMover();
+//                } else {
+//                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_enabled);
+//                    locationUtils.moveMap();
+//                    locationUtils.startCurrentLocationMapMover();
+//                }
             }
         });
 
@@ -209,7 +234,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             @Override
             public void onMove(@NonNull MoveGestureDetector detector) {
-                locationUtils.stopCurrentLocationMapMover();
                 btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
             }
 
@@ -220,13 +244,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     public void initLocationListener() {
-        locationUtils = new LocationUtils(getSystemService(Context.LOCATION_SERVICE), mapboxMap, this, this);
+//        locationUtils = new LocationUtils(mapboxMap, this, this);
 
     }
 
     public void summaryViewTransition() {
         floatingSearchView.setText("");
-        mapView.requestFocus();
+//        mapView.requestFocus();
 
         floatingSearchView.animate()
                 .translationY(-500.0f)
@@ -235,10 +259,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         floatingSearchView.setVisibility(View.INVISIBLE);
+                        llAddressViewFragment.setVisibility(View.VISIBLE);
                     }
                 });
-        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        sheetBehavior.setPeekHeight(150);
+//        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//        sheetBehavior.setPeekHeight(150);
     }
 
     public void zoomToLatLng(LatLng latLng, int animMilli) {
@@ -310,6 +335,22 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        Timber.w("FOCUS CHANGED" + v.toString());
+        floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
+        switch (v.getId()) {
+            case R.id.floating_search_view:
+                btCurrentLocation.setVisibility(View.INVISIBLE);
+                Timber.w("BUTTTON INVISISBLE");
+            case R.id.map_view:
+                btCurrentLocation.setVisibility(View.VISIBLE);
+                Timber.w("BUTTTON VISIBLE");
+            default:
+                btCurrentLocation.setVisibility(View.VISIBLE);
+        }
+    }
+
     private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, SuggestionViewHolder> {
 
         private LayoutInflater inflater;
@@ -355,6 +396,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
                 floatingSearchView.setText(clickedFeature.getPlaceName());
                 mAdapter.clear();
+                summaryViewTransition();
                 if (clickedFeature.hasBbox()) {
                     zoomToBbox(clickedFeature.getLatLngBounds(), 4000);
                 } else {

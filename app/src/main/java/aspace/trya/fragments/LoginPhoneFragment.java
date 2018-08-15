@@ -30,8 +30,6 @@ import io.michaelrocks.libphonenumber.android.Phonenumber;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
-
 
 public class LoginPhoneFragment extends Fragment {
 
@@ -96,11 +94,9 @@ public class LoginPhoneFragment extends Fragment {
                 final String deviceId = UUID.randomUUID().toString();
 
                 Call<AuthResponse> call = AspaceServiceGenerator.createService(AspaceService.class).phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
-                Timber.w("SENT CALL: " + phoneNumber + ", " + deviceId + ", \'F\'");
                 call.enqueue(new Callback<AuthResponse>() {
                     @Override
                     public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                        Timber.w(response.body().toString());
                         int responseCode = response.body().getResponseCode();
                         if (responseCode == AspaceResponseCodes.INVALID_PHONE) {
                             phoneNumberEditText.setError("Invalid phone #");
@@ -114,7 +110,6 @@ public class LoginPhoneFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
-                        Timber.w("FAILURE: " + t);
                     }
                 });
             }

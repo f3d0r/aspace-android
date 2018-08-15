@@ -26,7 +26,6 @@ import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 
 public class LoginPinFragment extends Fragment {
@@ -109,7 +108,6 @@ public class LoginPinFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
-                        Timber.e(t);
                         Toast.makeText(getContext(), "Something went wrong, please restart the app.", Toast.LENGTH_SHORT).show();
                     }
                 });

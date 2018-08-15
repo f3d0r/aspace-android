@@ -29,11 +29,6 @@ import aspace.trya.api.AspaceServiceGenerator;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.models.CodeResponse;
-import aspace.trya.realm.AppUser;
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,17 +36,19 @@ import timber.log.Timber;
 
 public class SplashScreen extends Activity {
 
-    private Realm realm;
-
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
     private boolean mAlreadyStartedService = false;
 
     private boolean locationReceived;
 
+    private ApplicationState applicationState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        applicationState = new ApplicationState(SplashScreen.this);
+
         startStep1();
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver() {
@@ -70,53 +67,42 @@ public class SplashScreen extends Activity {
         setContentView(R.layout.activity_splash);
 
         loadLibraries();
-        initRealm();
     }
 
     public void loadLibraries() {
         Timber.plant(new Timber.DebugTree());
     }
 
-    public void initRealm() {
-        Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(42)
-                .build();
-        realm = Realm.getInstance(config);
-    }
-
     public void checkUserLoggedIn(String latitude, String longitude) {
-        RealmQuery<AppUser> query = realm.where(AppUser.class);
-        RealmResults<AppUser> users = query.findAll();
-        if (users.size() == 0) {
-            getLocationAndSend(latitude, longitude, MainActivity.class);
+        String loggedInAccessCode = applicationState.getAccessCode();
+        applicationState.setLoadLocation(latitude, longitude);
+        if (loggedInAccessCode == null) {
+            getLocationAndSend(LoginActivity.class);
         } else {
-            Call<CodeResponse> call = AspaceServiceGenerator.createService(AspaceService.class).checkAuth(users.get(0).accessCode.accessCode, users.get(0).deviceId);
+            Call<CodeResponse> call = AspaceServiceGenerator.createService(AspaceService.class).checkAuth(loggedInAccessCode, applicationState.getDeviceId());
             call.enqueue(new Callback<CodeResponse>() {
                 @Override
                 public void onResponse(Call<CodeResponse> call, Response<CodeResponse> response) {
                     int responseCode = response.body().getResInfo().getCode();
                     if (responseCode == 40) {
-                        getLocationAndSend(latitude, longitude, MapActivity.class);
+                        getLocationAndSend(MapActivity.class);
                     } else {
-                        getLocationAndSend(latitude, longitude, MainActivity.class);
+                        getLocationAndSend(LoginActivity.class);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<CodeResponse> call, Throwable t) {
-                    ApplicationState.logout();
-                    getLocationAndSend(latitude, longitude, MainActivity.class);
+                    applicationState.logout();
+                    getLocationAndSend(LoginActivity.class);
                 }
             });
         }
     }
 
-    public void getLocationAndSend(String latitude, String longitude, Class throughClass) {
-        Intent nextIntent = new Intent(SplashScreen.this, throughClass);
-        nextIntent.putExtra("currentLocLat", Double.valueOf(latitude));
-        nextIntent.putExtra("currentLocLon", Double.valueOf(longitude));
-        startActivity(nextIntent);
+    public void getLocationAndSend(Class throughClass) {
+        Intent intent = new Intent(SplashScreen.this, throughClass);
+        startActivity(intent);
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
         finish();
@@ -134,13 +120,10 @@ public class SplashScreen extends Activity {
      * Step 1: Check Google Play services
      */
     private void startStep1() {
-
         //Check whether this user has installed Google play service which is being used by Location updates.
         if (isGooglePlayServicesAvailable()) {
-
             //Passing null to indicate that it is executing for the first time.
             startStep2(null);
-
         } else {
             Toast.makeText(getApplicationContext(), "NO GOOGLE PLAY SERVICES", Toast.LENGTH_LONG).show();
         }
@@ -159,12 +142,9 @@ public class SplashScreen extends Activity {
             promptInternetConnect();
             return false;
         }
-
-
         if (dialog != null) {
             dialog.dismiss();
         }
-
         //Yes there is active internet connection. Next check Location is granted by user or not.
 
         if (checkPermissions()) { //Yes permissions are granted by the user. Go to the next step.
@@ -253,23 +233,18 @@ public class SplashScreen extends Activity {
      * Start permissions requests.
      */
     private void requestPermissions() {
-
         boolean shouldProvideRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         android.Manifest.permission.ACCESS_FINE_LOCATION);
-
         boolean shouldProvideRationale2 =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_COARSE_LOCATION);
-
         if (shouldProvideRationale || shouldProvideRationale2) {
-            Timber.w("Displaying permission rationale to provide additional context.");
             showSnackbar("Requesting Permission",
                     "OK?", view -> ActivityCompat.requestPermissions(SplashScreen.this,
                             new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                             REQUEST_PERMISSIONS_REQUEST_CODE));
         } else {
-            Timber.w("Requesting permission");
             ActivityCompat.requestPermissions(SplashScreen.this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_PERMISSIONS_REQUEST_CODE);
@@ -299,17 +274,9 @@ public class SplashScreen extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        Timber.w("onRequestPermissionResult");
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length <= 0) {
-                // If img_user interaction was interrupted, the permission request is cancelled and you
-                // receive empty arrays.
-                Timber.w("User interaction was cancelled.");
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                Timber.w("Permission granted, updates requested, starting location updates");
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startStep3();
-
             } else {
                 showSnackbar("Permission was denied",
                         "Settings", view -> {

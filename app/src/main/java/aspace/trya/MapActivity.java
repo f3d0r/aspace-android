@@ -2,11 +2,15 @@ package aspace.trya;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.RecyclerView;
@@ -45,13 +49,13 @@ import aspace.trya.geojson.Feature;
 import aspace.trya.geojson.GeoJSON;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
+import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener, View.OnFocusChangeListener {
     @BindView(R.id.map_view)
@@ -96,12 +100,35 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private LatLng beginLocation;
 
+    private ApplicationState applicationState;
+
+    private boolean locationTracked;
+
+    private LatLng lastCurrentLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        beginLocation = new LatLng(getIntent().getDoubleExtra("currentLocLat", 0), getIntent().getDoubleExtra("currentLocLon", 0));
-        Timber.w("LATLNG BEGIN : " + beginLocation);
         setContentView(R.layout.activity_map);
+
+        applicationState = new ApplicationState(MapActivity.this);
+        beginLocation = applicationState.getLoadLocation();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        String latitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
+                        String longitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
+                        if (latitude != null && longitude != null) {
+                            lastCurrentLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                            if (locationTracked && mapboxMap != null) {
+                                zoomToLatLng(lastCurrentLocation, 250);
+                            }
+                        }
+                    }
+                }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
+        );
 
         ButterKnife.bind(this);
 
@@ -206,24 +233,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        initLocationListener();
         CameraPosition position = new CameraPosition.Builder()
                 .target(beginLocation)
                 .zoom(14)
                 .build();
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
         mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
-        btCurrentLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                if (locationUtils.isCurrentLocationTracked()) {
-//                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
-//                    locationUtils.stopCurrentLocationMapMover();
-//                } else {
-//                    btCurrentLocation.setImageResource(R.drawable.ic_current_location_enabled);
-//                    locationUtils.moveMap();
-//                    locationUtils.startCurrentLocationMapMover();
-//                }
+        btCurrentLocation.setOnClickListener(v -> {
+            locationTracked = !locationTracked;
+            btCurrentLocation.setImageResource(locationTracked ? R.drawable.ic_current_location_enabled : R.drawable.ic_current_location_disabled);
+            if (locationTracked) {
+                zoomToLatLng(lastCurrentLocation, 250);
             }
         });
 
@@ -235,17 +255,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onMove(@NonNull MoveGestureDetector detector) {
                 btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
+                locationTracked = false;
             }
 
             @Override
             public void onMoveEnd(@NonNull MoveGestureDetector detector) {
             }
         });
-    }
-
-    public void initLocationListener() {
-//        locationUtils = new LocationUtils(mapboxMap, this, this);
-
     }
 
     public void summaryViewTransition() {
@@ -326,8 +342,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 floatingSearchView.setActivated(false);
                 return true;
             case R.id.logout_menu_item:
-                ApplicationState.logout();
-                startActivity(new Intent(MapActivity.this, MainActivity.class));
+                applicationState.logout();
+                startActivity(new Intent(MapActivity.this, LoginActivity.class));
                 finish();
             default:
                 return false;
@@ -337,15 +353,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        Timber.w("FOCUS CHANGED" + v.toString());
         floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
         switch (v.getId()) {
             case R.id.floating_search_view:
                 btCurrentLocation.setVisibility(View.INVISIBLE);
-                Timber.w("BUTTTON INVISISBLE");
             case R.id.map_view:
                 btCurrentLocation.setVisibility(View.VISIBLE);
-                Timber.w("BUTTTON VISIBLE");
             default:
                 btCurrentLocation.setVisibility(View.VISIBLE);
         }

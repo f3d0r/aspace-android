@@ -13,9 +13,11 @@ import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.OnApplicationStateListener;
 import aspace.trya.models.AccessCode;
 
-public class MainActivity extends AppCompatActivity implements OnApplicationStateListener {
+public class LoginActivity extends AppCompatActivity implements OnApplicationStateListener {
 
     private HashMap<String, String> applicationState;
+
+    ApplicationState applicationStateModifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +25,9 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
         setContentView(R.layout.activity_main);
 
         applicationState = new HashMap<>();
+        applicationStateModifier = new ApplicationState(LoginActivity.this);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
         ft.replace(R.id.main_container, new LoginPhoneFragment());
         ft.commit();
     }
@@ -52,10 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
 
     @Override
     public void pinExpired() {
-        applicationState.remove("LOGIN_PHONE_NUMBER");
-        applicationState.remove("DEVICE_ID");
-        applicationState.remove("ONBOARD");
-
+        applicationStateModifier.logout();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
 
@@ -65,12 +64,11 @@ public class MainActivity extends AppCompatActivity implements OnApplicationStat
 
     @Override
     public void continueFromLogin(AccessCode accessCode) {
-        ApplicationState.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode, applicationState.get("DEVICE_ID"));
-        applicationState.put("ACCESS_CODE", accessCode.getAccessCode());
+        applicationStateModifier.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode, applicationState.get("DEVICE_ID"));
         if (applicationState.get("ONBOARD").equals("true")) {
-            startActivity(new Intent(MainActivity.this, OnboardingActivity.class));
+            startActivity(new Intent(LoginActivity.this, OnboardingActivity.class));
         } else {
-            startActivity(new Intent(MainActivity.this, MapActivity.class));
+            startActivity(new Intent(LoginActivity.this, MapActivity.class));
         }
         finish();
     }

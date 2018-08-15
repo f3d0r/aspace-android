@@ -21,8 +21,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import timber.log.Timber;
-
 public class LocationMonitoringService extends Service implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -51,8 +49,8 @@ public class LocationMonitoringService extends Service implements
                 .addApi(LocationServices.API)
                 .build();
 
-        mLocationRequest.setInterval(2000);
-        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(500);
 
 
         int priority = LocationRequest.PRIORITY_HIGH_ACCURACY; //by default
@@ -103,8 +101,6 @@ public class LocationMonitoringService extends Service implements
 
         Log.d(TAG, "Sending info...");
 
-        Timber.w("SENDING LAT: " + lat);
-        Timber.w("SENDING LON: " + lng);
         Intent intent = new Intent(ACTION_LOCATION_BROADCAST);
         intent.putExtra(EXTRA_LATITUDE, lat);
         intent.putExtra(EXTRA_LONGITUDE, lng);

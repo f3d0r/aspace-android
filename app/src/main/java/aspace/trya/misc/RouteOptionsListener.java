@@ -4,6 +4,4 @@ public interface RouteOptionsListener {
     void routeOptionsOriginSelectorClicked();
 
     void routeOptionsDestinationSelectorClicked();
-
-    void routeOptionsBackButtonClicked();
 }

@@ -387,19 +387,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         }
     }
 
-    @Override
-    public void routeOptionsBackButtonClicked() {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
-        if (fragment != null) {
-            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-            floatingSearchView.setHint("Where to?");
-            toggleSearchViewVisible(true, () -> {
-
-            });
-        }
-
-    }
-
     private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, MapActivity.SuggestionViewHolder> {
         private LayoutInflater inflater;
 

@@ -2,7 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryDark"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginTop="5dp"
+    android:background="@drawable/address_selector_background"
     android:orientation="vertical">
 
     <LinearLayout
@@ -21,7 +24,7 @@
             android:background="@drawable/background_image_button"
             android:padding="5dp"
             android:src="@drawable/ic_arrow_back"
-            android:tint="@android:color/white" />
+            android:tint="@android:color/black" />
 
         <ImageView
             android:id="@+id/start_location_ic"
@@ -42,6 +45,7 @@
             android:src="@drawable/ic_arrow_forward" />
 
         <TextView
+            android:id="@+id/end_location_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -54,7 +58,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/third_row_layout"
+        android:id="@+id/second_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

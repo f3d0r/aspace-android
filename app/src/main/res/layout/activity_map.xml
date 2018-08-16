@@ -46,10 +46,11 @@
             android:src="@drawable/ic_current_location_disabled" />
     </FrameLayout>
 
-    <include
-        android:id="@+id/address_view_fragment"
-        layout="@layout/fragment_address_view"
-        android:visibility="invisible" />
+    <LinearLayout
+        android:id="@+id/top_summary_view_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
 
     <include layout="@layout/route_options_preview" />
 

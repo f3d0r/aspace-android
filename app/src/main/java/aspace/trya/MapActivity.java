@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ActionMenuView;
@@ -45,11 +47,13 @@ import aspace.trya.adapter.ArrayRecyclerAdapter;
 import aspace.trya.api.MapboxService;
 import aspace.trya.api.MapboxServiceGenerator;
 import aspace.trya.api.RetrofitLatLng;
+import aspace.trya.fragments.RouteOptionsPreviewFragment;
 import aspace.trya.geojson.Feature;
 import aspace.trya.geojson.GeoJSON;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.misc.LocationMonitoringService;
+import aspace.trya.misc.RouteOptionsListener;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,7 +61,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener, View.OnFocusChangeListener {
+public class MapActivity extends AppCompatActivity implements RouteOptionsListener, OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener, View.OnFocusChangeListener {
     @BindView(R.id.map_view)
     MapView mapView;
     @BindView(R.id.floating_search_view)
@@ -89,9 +93,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @BindView(R.id.start_route_button)
     Button btStartRoute;
-
-    @BindView(R.id.address_view_fragment)
-    LinearLayout llAddressViewFragment;
 
     BottomSheetBehavior sheetBehavior;
     private MapboxMap mapboxMap;
@@ -264,24 +265,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    public void summaryViewTransition() {
-        floatingSearchView.setText("");
-//        mapView.requestFocus();
-
-        floatingSearchView.animate()
-                .translationY(-500.0f)
-                .setDuration(500)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        floatingSearchView.setVisibility(View.INVISIBLE);
-                        llAddressViewFragment.setVisibility(View.VISIBLE);
-                    }
-                });
-//        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-//        sheetBehavior.setPeekHeight(150);
-    }
-
     public void zoomToLatLng(LatLng latLng, int animMilli) {
         CameraPosition position = new CameraPosition.Builder()
                 .target(latLng)
@@ -339,6 +322,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         switch (item.getItemId()) {
             case R.id.clear_search_menu_item:
                 floatingSearchView.setText("");
+                floatingSearchView.setHint("Where to?");
                 floatingSearchView.setActivated(false);
                 return true;
             case R.id.logout_menu_item:
@@ -364,8 +348,59 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, SuggestionViewHolder> {
+    public void toggleSearchViewVisible(boolean visible, aspace.trya.misc.Callback callback) {
+        floatingSearchView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        floatingSearchView.animate()
+                .translationYBy(visible ? 200.0f : -200.0f)
+                .setDuration(500)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        if (callback != null) {
+                            callback.execute();
+                        }
+                    }
+                });
+    }
 
+    @Override
+    public void routeOptionsOriginSelectorClicked() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
+        if (fragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+            floatingSearchView.setHint("Origin:");
+            toggleSearchViewVisible(true, () -> {
+
+            });
+        }
+    }
+
+    @Override
+    public void routeOptionsDestinationSelectorClicked() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
+        if (fragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+            floatingSearchView.setHint("Destination:");
+            toggleSearchViewVisible(true, () -> {
+
+            });
+        }
+    }
+
+    @Override
+    public void routeOptionsBackButtonClicked() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
+        if (fragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+            floatingSearchView.setHint("Where to?");
+            toggleSearchViewVisible(true, () -> {
+
+            });
+        }
+
+    }
+
+    private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, MapActivity.SuggestionViewHolder> {
         private LayoutInflater inflater;
 
         SearchAdapter() {
@@ -373,13 +408,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
 
         @Override
-        public SuggestionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public MapActivity.SuggestionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (inflater == null) inflater = LayoutInflater.from(parent.getContext());
-            return new SuggestionViewHolder(inflater.inflate(R.layout.item_suggestion, parent, false));
+            return new MapActivity.SuggestionViewHolder(inflater.inflate(R.layout.item_suggestion, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(SuggestionViewHolder holder, int position) {
+        public void onBindViewHolder(MapActivity.SuggestionViewHolder holder, int position) {
             holder.bind(getItem(position));
         }
 
@@ -390,7 +425,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private class SuggestionViewHolder extends RecyclerView.ViewHolder {
-
         ImageView locationType, goButton;
         TextView mainAddress, cityState;
 
@@ -401,15 +435,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mainAddress = itemView.findViewById(R.id.main_address_tv);
             cityState = itemView.findViewById(R.id.city_state_tv);
             itemView.findViewById(R.id.address_layout).setOnClickListener(v -> {
+                Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
                 KeyboardUtils.hideSoftKeyboard(getCurrentFocus(), getSystemService(INPUT_METHOD_SERVICE));
 
-                sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 floatingSearchView.setActivated(false);
-
-                Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
-                floatingSearchView.setText(clickedFeature.getPlaceName());
-                mAdapter.clear();
-                summaryViewTransition();
+                toggleSearchViewVisible(false, () -> {
+                    floatingSearchView.setText(clickedFeature.getPlaceName());
+                    mAdapter.clear();
+                    floatingSearchView.setVisibility(View.INVISIBLE);
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    ft.replace(R.id.top_summary_view_fragment, new RouteOptionsPreviewFragment());
+                    ft.commit();
+                });
                 if (clickedFeature.hasBbox()) {
                     zoomToBbox(clickedFeature.getLatLngBounds(), 4000);
                 } else {

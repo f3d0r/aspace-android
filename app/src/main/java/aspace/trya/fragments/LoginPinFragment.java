@@ -40,7 +40,6 @@ public class LoginPinFragment extends Fragment {
 
     private String loginPhoneNumber;
     private String deviceId;
-    private boolean onboard;
 
     private OnApplicationStateListener mListener;
 
@@ -53,7 +52,6 @@ public class LoginPinFragment extends Fragment {
 
         loginPhoneNumber = getArguments().getString("LOGIN_PHONE_NUMBER");
         deviceId = getArguments().getString("DEVICE_ID");
-        onboard = getArguments().getBoolean("ONBOARD");
 
         continueButton.setEnabled(true);
 
@@ -122,7 +120,7 @@ public class LoginPinFragment extends Fragment {
     public void createResendPinTimer() {
         final String sendPinText = "Re-Send PIN in ";
         final String finalSendPinText = "Re-Send PIN";
-        CountDownTimer timer = new CountDownTimer(30000, 1000) {
+        new CountDownTimer(30000, 1000) {
             public void onTick(long millisUntilFinished) {
                 sendAgainTextView.setEnabled(false);
                 String newButtonText = sendPinText + (millisUntilFinished / 1000);

@@ -34,7 +34,6 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -53,6 +52,7 @@ import aspace.trya.geojson.GeoJSON;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.misc.LocationMonitoringService;
+import aspace.trya.misc.MapUtils;
 import aspace.trya.misc.RouteOptionsListener;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
@@ -107,6 +107,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     private LatLng lastCurrentLocation;
 
+    private MapUtils mapUtils;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +126,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                         if (latitude != null && longitude != null) {
                             lastCurrentLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
                             if (locationTracked && mapboxMap != null) {
-                                zoomToLatLng(lastCurrentLocation, 250);
+                                mapUtils.zoomToLatLng(lastCurrentLocation, 250);
                             }
                         }
                     }
@@ -234,6 +236,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        mapUtils = new MapUtils(mapboxMap);
         CameraPosition position = new CameraPosition.Builder()
                 .target(beginLocation)
                 .zoom(14)
@@ -244,7 +247,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             locationTracked = !locationTracked;
             btCurrentLocation.setImageResource(locationTracked ? R.drawable.ic_current_location_enabled : R.drawable.ic_current_location_disabled);
             if (locationTracked) {
-                zoomToLatLng(lastCurrentLocation, 250);
+                mapUtils.zoomToLatLng(lastCurrentLocation, 250);
             }
         });
 
@@ -263,20 +266,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             public void onMoveEnd(@NonNull MoveGestureDetector detector) {
             }
         });
-    }
-
-    public void zoomToLatLng(LatLng latLng, int animMilli) {
-        CameraPosition position = new CameraPosition.Builder()
-                .target(latLng)
-                .zoom(17) // Sets the zoom
-                .build(); // Creates a CameraPosition from the builder
-
-        mapboxMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(position), animMilli);
-    }
-
-    public void zoomToBbox(LatLngBounds latLngBounds, int animMilli) {
-        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), animMilli);
     }
 
     @Override
@@ -436,9 +425,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                     ft.commit();
                 });
                 if (clickedFeature.hasBbox()) {
-                    zoomToBbox(clickedFeature.getLatLngBounds(), 4000);
+                    mapUtils.zoomToBbox(clickedFeature.getLatLngBounds(), 4000);
                 } else {
-                    zoomToLatLng(clickedFeature.getGeometry().getLatLng(), 3000);
+                    mapUtils.zoomToLatLng(clickedFeature.getGeometry().getLatLng(), 3000);
                 }
             });
         }

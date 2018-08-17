@@ -30,7 +30,7 @@
             android:hint="Where to?"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:paddingTop="8dp"
+            android:paddingTop="5dp"
             android:singleLine="true"
             app:fsv_cornerRadius="3dp"
             app:fsv_menu="@menu/searchview_menu" />

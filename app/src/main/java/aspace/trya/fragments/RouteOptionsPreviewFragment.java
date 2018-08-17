@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 import aspace.trya.R;
 import aspace.trya.misc.RouteOptionsListener;
 import butterknife.BindView;
@@ -35,11 +37,31 @@ public class RouteOptionsPreviewFragment extends Fragment {
 
     private RouteOptionsListener mListener;
 
+    private boolean[] routeOptionsSelected = {false, false, false};
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup parent, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_address_view, parent, false);
         ButterKnife.bind(this, view);
+
+        selectCarBikeMethod.setOnClickListener(v -> {
+                    Arrays.fill(routeOptionsSelected, false);
+                    routeOptionsSelected[0] = true;
+                }
+        );
+
+        selectCarWalkMethod.setOnClickListener(v -> {
+                    Arrays.fill(routeOptionsSelected, false);
+                    routeOptionsSelected[1] = true;
+                }
+        );
+
+        selectCarDirectMethod.setOnClickListener(v -> {
+                    Arrays.fill(routeOptionsSelected, false);
+                    routeOptionsSelected[2] = true;
+                }
+        );
 
         return view;
     }

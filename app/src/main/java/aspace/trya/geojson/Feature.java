@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Feature {
+public class Feature implements Serializable {
 
     @JsonProperty("place_name")
     private String placeName;
@@ -163,4 +165,30 @@ public class Feature {
                     .build();
         }
     }
+
+    public Feature() {
+    }
+
+    public Feature(LatLng latlng, boolean currentLocation) {
+        if (currentLocation) {
+            this.geometry = new Geometry();
+            List<Double> coordinates = new ArrayList<>();
+            coordinates.add(latlng.getLongitude());
+            coordinates.add(latlng.getLatitude());
+            geometry.setCoordinates(coordinates);
+            this.setPlaceName("Current Location");
+            List<String> placeType = new ArrayList<>();
+            placeType.add("place");
+            this.setPlaceType(placeType);
+        }
+    }
+
+    public String getPlaceNameLine1() {
+        return getPlaceName().substring(0, getPlaceName().indexOf(", "));
+    }
+
+    public String getPlaceNameLine2() {
+        return getPlaceName().substring(getPlaceName().indexOf(", ") + 2);
+    }
+
 }

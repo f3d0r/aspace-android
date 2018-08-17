@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,7 +33,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mapbox.android.gestures.MoveGestureDetector;
+import com.mapbox.android.gestures.StandardScaleGestureDetector;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -61,7 +67,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapActivity extends AppCompatActivity implements RouteOptionsListener, OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener, View.OnFocusChangeListener {
+public class MapActivity extends AppCompatActivity implements RouteOptionsListener, OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener {
     @BindView(R.id.map_view)
     MapView mapView;
     @BindView(R.id.floating_search_view)
@@ -94,6 +100,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @BindView(R.id.start_route_button)
     Button btStartRoute;
 
+    @BindView(R.id.zoom_in_warning_cardview)
+    CardView cvZoomInWarning;
+
     BottomSheetBehavior sheetBehavior;
     private MapboxMap mapboxMap;
 
@@ -108,6 +117,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     private LatLng lastCurrentLocation;
 
     private MapUtils mapUtils;
+
+    //For Route Display (Defaults)
+    private Feature routeOrigin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +137,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                         String longitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
                         if (latitude != null && longitude != null) {
                             lastCurrentLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                            routeOrigin = new Feature(beginLocation, true);
                             if (locationTracked && mapboxMap != null) {
                                 mapUtils.zoomToLatLng(lastCurrentLocation, 250);
                             }
@@ -138,6 +151,12 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         rlBikeRoute.setOnClickListener(this);
         rlDriveRoute.setOnClickListener(this);
         rlWalkRoute.setOnClickListener(this);
+
+        floatingSearchView.setOnSearchFocusChangedListener(focused -> {
+            floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
+            cvZoomInWarning.setAlpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0);
+            btCurrentLocation.setVisibility(focused ? View.INVISIBLE : View.VISIBLE);
+        });
 
         Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));
 
@@ -233,6 +252,12 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         layoutBottomSheet.setOnClickListener(v -> sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED));
     }
 
+    public void getAndPopulateMarkers() {
+        mapboxMap.addMarker(new MarkerOptions()
+                .icon(IconFactory.getInstance(this).fromResource(R.drawable.parking_icon_red))
+                .position(new LatLng(beginLocation)));
+    }
+
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
@@ -266,6 +291,34 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             public void onMoveEnd(@NonNull MoveGestureDetector detector) {
             }
         });
+
+        mapboxMap.addOnScaleListener(new MapboxMap.OnScaleListener() {
+            boolean beginStatus;
+
+            @Override
+            public void onScaleBegin(@NonNull StandardScaleGestureDetector detector) {
+                beginStatus = mapboxMap.getCameraPosition().zoom < 15;
+            }
+
+            @Override
+            public void onScale(@NonNull StandardScaleGestureDetector detector) {
+                boolean warningVisible = mapboxMap.getCameraPosition().zoom < 15;
+                if (beginStatus != warningVisible) {
+                    beginStatus = warningVisible;
+                    cvZoomInWarning.animate().setDuration(200).alpha(warningVisible ? 1 : 0).start();
+                }
+            }
+
+            @Override
+            public void onScaleEnd(@NonNull StandardScaleGestureDetector detector) {
+            }
+        });
+
+        mapboxMap.addOnMapClickListener(point -> {
+            btCurrentLocation.setVisibility(View.VISIBLE);
+        });
+
+        getAndPopulateMarkers();
     }
 
     @Override
@@ -276,7 +329,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     @Override
     public void onClick(View v) {
-        resetRouteSelection();
         switch (v.getId()) {
             case R.id.bike_route:
                 rlBikeRoute.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -286,7 +338,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             case R.id.drive_route:
                 rlDriveRoute.setBackground(getResources().getDrawable(R.drawable.rounded_dialog_selected));
                 btStartRoute.setText("Start Direct Route");
-
                 btStartRoute.setVisibility(View.VISIBLE);
                 break;
             case R.id.walk_route:
@@ -295,7 +346,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 btStartRoute.setVisibility(View.VISIBLE);
                 break;
             default:
-                break;
+                btCurrentLocation.setVisibility(View.VISIBLE);
         }
     }
 
@@ -324,24 +375,11 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     }
 
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
-        switch (v.getId()) {
-            case R.id.floating_search_view:
-                btCurrentLocation.setVisibility(View.INVISIBLE);
-            case R.id.map_view:
-                btCurrentLocation.setVisibility(View.VISIBLE);
-            default:
-                btCurrentLocation.setVisibility(View.VISIBLE);
-        }
-    }
-
     public void toggleSearchViewVisible(boolean visible, aspace.trya.misc.Callback callback) {
         floatingSearchView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         floatingSearchView.animate()
                 .translationYBy(visible ? 200.0f : -200.0f)
-                .setDuration(500)
+                .setDuration(150)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -353,30 +391,68 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     }
 
     @Override
-    public void routeOptionsOriginSelectorClicked() {
+    public void routeOptionsOriginSelectorClicked(CardView cvRouteOptions) {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
         if (fragment != null) {
-            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-            floatingSearchView.setHint("Origin:");
-            toggleSearchViewVisible(true, () -> {
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
 
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.remove(fragment);
+                    ft.commitAllowingStateLoss();
+                    floatingSearchView.setHint("Origin?");
+                    toggleSearchViewVisible(true, () -> {
+                        floatingSearchView.requestFocus();
+                        floatingSearchView.setActivated(true);
+                    });
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
             });
+            cvRouteOptions.startAnimation(animation);
         }
+
     }
 
     @Override
-    public void routeOptionsDestinationSelectorClicked() {
+    public void routeOptionsDestinationSelectorClicked(CardView cvRouteOptions) {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
         if (fragment != null) {
-            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-            floatingSearchView.setHint("Destination:");
-            toggleSearchViewVisible(true, () -> {
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
 
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.remove(fragment);
+                    ft.commitAllowingStateLoss();
+                    floatingSearchView.setHint("Destination?");
+                    toggleSearchViewVisible(true, () -> {
+                        floatingSearchView.requestFocus();
+                        floatingSearchView.setActivated(true);
+                    });
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
             });
+            cvRouteOptions.startAnimation(animation);
         }
+
     }
 
-    private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, MapActivity.SuggestionViewHolder> {
+    private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, SuggestionViewHolder> {
         private LayoutInflater inflater;
 
         SearchAdapter() {
@@ -414,14 +490,25 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
                 KeyboardUtils.hideSoftKeyboard(getCurrentFocus(), getSystemService(INPUT_METHOD_SERVICE));
 
+                btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
+                btCurrentLocation.setVisibility(View.GONE);
+                locationTracked = false;
+
                 floatingSearchView.setActivated(false);
                 toggleSearchViewVisible(false, () -> {
                     floatingSearchView.setText(clickedFeature.getPlaceName());
                     mAdapter.clear();
                     floatingSearchView.setVisibility(View.INVISIBLE);
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+                    Bundle data = new Bundle();
+                    data.putSerializable("ORIGIN", routeOrigin);
+                    data.putSerializable("DESTINATION", clickedFeature);
+                    data.putInt("PREFFERED_ROUTE_METHOD", 0);
+
                     ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    ft.replace(R.id.top_summary_view_fragment, new RouteOptionsPreviewFragment());
+                    RouteOptionsPreviewFragment fragment = RouteOptionsPreviewFragment.newInstance(routeOrigin, clickedFeature, 0);
+                    ft.replace(R.id.top_summary_view_fragment, fragment);
                     ft.commit();
                 });
                 if (clickedFeature.hasBbox()) {

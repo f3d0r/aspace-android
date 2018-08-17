@@ -2,6 +2,7 @@ package aspace.trya;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -102,7 +103,8 @@ public class SplashScreen extends Activity {
 
     public void getLocationAndSend(Class throughClass) {
         Intent intent = new Intent(SplashScreen.this, throughClass);
-        startActivity(intent);
+        ActivityOptions options = ActivityOptions.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out);
+        startActivity(intent, options.toBundle());
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
         finish();

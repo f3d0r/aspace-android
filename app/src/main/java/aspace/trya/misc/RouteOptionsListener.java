@@ -1,7 +1,9 @@
 package aspace.trya.misc;
 
-public interface RouteOptionsListener {
-    void routeOptionsOriginSelectorClicked();
+import android.support.v7.widget.CardView;
 
-    void routeOptionsDestinationSelectorClicked();
+public interface RouteOptionsListener {
+    void routeOptionsOriginSelectorClicked(CardView cvRouteOptions);
+
+    void routeOptionsDestinationSelectorClicked(CardView cvRouteOptions);
 }

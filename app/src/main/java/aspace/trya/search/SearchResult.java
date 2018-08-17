@@ -16,8 +16,8 @@ public class SearchResult {
 
     public SearchResult(Feature feature, Context context) {
         this.feature = feature;
-        this.mainAddress = feature.getPlaceName().substring(0, feature.getPlaceName().indexOf(", "));
-        this.cityState = feature.getPlaceName().substring(feature.getPlaceName().indexOf(", ") + 2);
+        this.mainAddress = feature.getPlaceNameLine1();
+        this.cityState = feature.getPlaceNameLine2();
         this.goButton = ContextCompat.getDrawable(context, R.drawable.ic_arrow_forward);
         String placeType = feature.getPlaceType().get(feature.getPlaceType().size() - 1);
         if (placeType.equals("country")) {

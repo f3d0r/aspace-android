@@ -22,16 +22,17 @@
         <com.mypopsy.widget.FloatingSearchView
             android:id="@+id/floating_search_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#90000000"
-            android:divider="#c9c9c9"
-            android:dividerHeight="1dp"
-            android:ellipsize="end"
-            android:hint="Where to?"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:divider="@android:color/white"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:paddingTop="5dp"
+            android:dividerHeight="1dp"
+            android:ellipsize="end"
+            android:hint="Where to?"
             android:singleLine="true"
+            app:fsv_contentBackgroundColor="@color/white"
             app:fsv_cornerRadius="3dp"
             app:fsv_menu="@menu/searchview_menu" />
 
@@ -39,11 +40,32 @@
             android:id="@+id/current_location_button"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_gravity="end|bottom"
+            android:layout_gravity="right|bottom"
             android:layout_marginBottom="20dp"
             android:layout_marginRight="20dp"
             android:scaleType="center"
             android:src="@drawable/ic_current_location_disabled" />
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/zoom_in_warning_cardview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="10dp"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="5dp"
+            app:cardUseCompatPadding="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingBottom="3dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="3dp"
+                android:text="Zoom in to view parking." />
+        </android.support.v7.widget.CardView>
     </FrameLayout>
 
     <LinearLayout

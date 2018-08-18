@@ -1,4 +1,4 @@
-package aspace.trya.geojson;
+package aspace.trya.models.geojson;
 
 import android.content.Context;
 
@@ -29,7 +29,7 @@ public class GeoJSON {
         this.features = features;
     }
 
-    public List<Feature> getFeatures() {
+    private List<Feature> getFeatures() {
         return features;
     }
 
@@ -69,7 +69,7 @@ public class GeoJSON {
     }
 
     public ArrayList<SearchResult> getSearchResults(Context context) {
-        ArrayList<SearchResult> searchResults = new ArrayList<SearchResult>();
+        ArrayList<SearchResult> searchResults = new ArrayList<>();
         for (Feature currentFeature : getFeatures()) {
             searchResults.add(new SearchResult(currentFeature, context));
         }

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -28,8 +27,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mapbox.android.gestures.MoveGestureDetector;
@@ -48,18 +45,18 @@ import com.mypopsy.widget.FloatingSearchView;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import aspace.trya.adapter.ArrayRecyclerAdapter;
 import aspace.trya.api.MapboxService;
 import aspace.trya.api.MapboxServiceGenerator;
 import aspace.trya.api.RetrofitLatLng;
 import aspace.trya.fragments.RouteOptionsPreviewFragment;
-import aspace.trya.geojson.Feature;
-import aspace.trya.geojson.GeoJSON;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.misc.MapUtils;
 import aspace.trya.misc.RouteOptionsListener;
+import aspace.trya.models.geojson.Feature;
+import aspace.trya.models.geojson.GeoJSON;
+import aspace.trya.search.ArrayRecyclerAdapter;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -72,29 +69,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     MapView mapView;
     @BindView(R.id.floating_search_view)
     FloatingSearchView floatingSearchView;
-    @BindView(R.id.bottom_sheet)
-    LinearLayout layoutBottomSheet;
     @BindView(R.id.current_location_button)
     FloatingActionButton btCurrentLocation;
-    @BindView(R.id.bike_route_cost)
-    TextView tvBikeRouteCost;
-    @BindView(R.id.bike_route_time)
-    TextView tvBikeRouteTime;
-    @BindView(R.id.drive_route_cost)
-    TextView tvDriveRouteCost;
-    @BindView(R.id.drive_route_time)
-    TextView tvDriveRouteTime;
-    @BindView(R.id.walk_route_cost)
-    TextView tvWalkRouteCost;
-    @BindView(R.id.walk_route_time)
-    TextView tvRouteWalkTime;
-    @BindView(R.id.bike_route)
-    RelativeLayout rlBikeRoute;
-    @BindView(R.id.drive_route)
-    RelativeLayout rlDriveRoute;
-    @BindView(R.id.walk_route)
-    RelativeLayout rlWalkRoute;
-
     Menu menuSearchView;
 
     @BindView(R.id.start_route_button)
@@ -103,7 +79,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @BindView(R.id.zoom_in_warning_cardview)
     CardView cvZoomInWarning;
 
-    BottomSheetBehavior sheetBehavior;
     private MapboxMap mapboxMap;
 
     private SearchAdapter mAdapter;
@@ -148,10 +123,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         ButterKnife.bind(this);
 
-        rlBikeRoute.setOnClickListener(this);
-        rlDriveRoute.setOnClickListener(this);
-        rlWalkRoute.setOnClickListener(this);
-
         floatingSearchView.setOnSearchFocusChangedListener(focused -> {
             floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
             cvZoomInWarning.setAlpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0);
@@ -159,9 +130,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         });
 
         Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));
-
-        sheetBehavior = BottomSheetBehavior.from(layoutBottomSheet);
-        sheetBehavior.setPeekHeight(0);
 
         mapView = findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
@@ -225,31 +193,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         });
 
         floatingSearchView.setOnMenuItemClickListener(this);
-
-        sheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                switch (newState) {
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                        break;
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                        break;
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        resetRouteSelection();
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                        break;
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        break;
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-            }
-        });
-        layoutBottomSheet.setOnClickListener(v -> sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED));
     }
 
     public void getAndPopulateMarkers() {
@@ -314,9 +257,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             }
         });
 
-        mapboxMap.addOnMapClickListener(point -> {
-            btCurrentLocation.setVisibility(View.VISIBLE);
-        });
+        mapboxMap.addOnMapClickListener(point -> btCurrentLocation.setVisibility(View.VISIBLE));
 
         getAndPopulateMarkers();
     }
@@ -330,31 +271,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.bike_route:
-                rlBikeRoute.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                btStartRoute.setText("Start Bike Transfer Route");
-                btStartRoute.setVisibility(View.VISIBLE);
-                break;
-            case R.id.drive_route:
-                rlDriveRoute.setBackground(getResources().getDrawable(R.drawable.rounded_dialog_selected));
-                btStartRoute.setText("Start Direct Route");
-                btStartRoute.setVisibility(View.VISIBLE);
-                break;
-            case R.id.walk_route:
-                rlWalkRoute.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                btStartRoute.setText("Start Walk Transfer Route");
-                btStartRoute.setVisibility(View.VISIBLE);
-                break;
             default:
                 btCurrentLocation.setVisibility(View.VISIBLE);
         }
-    }
-
-    public void resetRouteSelection() {
-        btStartRoute.setVisibility(View.GONE);
-        rlWalkRoute.setBackground(getResources().getDrawable(R.drawable.rounded_dialog));
-        rlBikeRoute.setBackground(getResources().getDrawable(R.drawable.rounded_dialog));
-        rlDriveRoute.setBackground(getResources().getDrawable(R.drawable.rounded_dialog));
     }
 
     @Override
@@ -373,6 +292,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 return false;
         }
 
+//        LineLayer lineLayer = new LineLayer().
     }
 
     public void toggleSearchViewVisible(boolean visible, aspace.trya.misc.Callback callback) {

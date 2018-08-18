@@ -1,6 +1,6 @@
 package aspace.trya.api;
 
-import aspace.trya.geojson.GeoJSON;
+import aspace.trya.models.geojson.GeoJSON;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;

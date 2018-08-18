@@ -1,4 +1,4 @@
-package aspace.trya.adapter;
+package aspace.trya.search;
 
 import android.support.v7.widget.RecyclerView;
 
@@ -28,15 +28,15 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
      */
     private boolean mNotifyOnChange = true;
 
-    public ArrayRecyclerAdapter() {
-        this(new ArrayList<T>());
+    protected ArrayRecyclerAdapter() {
+        this(new ArrayList<>());
     }
 
     public ArrayRecyclerAdapter(T[] objects) {
         this(Arrays.asList(objects));
     }
 
-    public ArrayRecyclerAdapter(List<T> objects) {
+    private ArrayRecyclerAdapter(List<T> objects) {
         mObjects = objects;
     }
 
@@ -88,7 +88,7 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
      * @param object The object to insert into the array.
      * @param index  The index at which the object must be inserted.
      */
-    public void insert(T object, int index) {
+    private void insert(T object, int index) {
         synchronized (mLock) {
             mObjects.add(index, object);
         }
@@ -100,7 +100,7 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
      *
      * @param object The object to remove.
      */
-    public void remove(T object) {
+    private void remove(T object) {
         int pos;
         synchronized (mLock) {
             pos = getPosition(object);
@@ -171,7 +171,7 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
      * @param item The item to retrieve the position of.
      * @return The position of the specified item.
      */
-    public int getPosition(T item) {
+    private int getPosition(T item) {
         return mObjects.indexOf(item);
     }
 

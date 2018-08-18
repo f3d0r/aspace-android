@@ -1,4 +1,4 @@
-package aspace.trya.geojson;
+package aspace.trya.models.geojson;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,7 +45,7 @@ public class Feature implements Serializable {
     @JsonProperty("bbox")
     private List<Double> bbox;
 
-    public void setPlaceName(String placeName) {
+    private void setPlaceName(String placeName) {
         this.placeName = placeName;
     }
 
@@ -53,7 +53,7 @@ public class Feature implements Serializable {
         return placeName;
     }
 
-    public void setPlaceType(List<String> placeType) {
+    private void setPlaceType(List<String> placeType) {
         this.placeType = placeType;
     }
 
@@ -125,7 +125,7 @@ public class Feature implements Serializable {
         return properties;
     }
 
-    public List<Double> getBbox() {
+    private List<Double> getBbox() {
         return bbox;
     }
 

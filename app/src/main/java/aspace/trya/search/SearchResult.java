@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
 import aspace.trya.R;
-import aspace.trya.geojson.Feature;
+import aspace.trya.models.geojson.Feature;
 
 public class SearchResult {
     private Feature feature;
@@ -20,18 +20,30 @@ public class SearchResult {
         this.cityState = feature.getPlaceNameLine2();
         this.goButton = ContextCompat.getDrawable(context, R.drawable.ic_arrow_forward);
         String placeType = feature.getPlaceType().get(feature.getPlaceType().size() - 1);
-        if (placeType.equals("country")) {
-            locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_flag);
-        } else if (placeType.equals("region") || placeType.equals("postcode") || placeType.equals("district")) {
-            locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_region);
-        } else if (placeType.equals("locality") || placeType.equals("neighborhood")) {
-            locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_neighborhood);
-        } else if (placeType.equals("place") || placeType.equals("poi") || placeType.equals("poi.landmark")) {
-            locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_location);
-        } else if (placeType.equals("address")) {
-            locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_home);
-        } else {
-            locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_location);
+        switch (placeType) {
+            case "country":
+                locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_flag);
+                break;
+            case "region":
+            case "postcode":
+            case "district":
+                locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_region);
+                break;
+            case "locality":
+            case "neighborhood":
+                locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_neighborhood);
+                break;
+            case "place":
+            case "poi":
+            case "poi.landmark":
+                locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_location);
+                break;
+            case "address":
+                locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_home);
+                break;
+            default:
+                locationType = ContextCompat.getDrawable(context, R.drawable.ic_lt_location);
+                break;
         }
     }
 

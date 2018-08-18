@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import aspace.trya.R;
-import aspace.trya.geojson.Feature;
 import aspace.trya.misc.RouteOptionsListener;
+import aspace.trya.models.geojson.Feature;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;

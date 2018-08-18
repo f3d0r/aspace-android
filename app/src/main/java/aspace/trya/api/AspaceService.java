@@ -7,6 +7,7 @@ import aspace.trya.models.AuthResponse;
 import aspace.trya.models.CodeResponse;
 import aspace.trya.models.ParkingResponse;
 import aspace.trya.models.RoutingResponse;
+import aspace.trya.models.routing.RouteOptionsResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -46,5 +47,8 @@ public interface AspaceService {
     //Routing Endpoints
     @POST("routing/get_route_waypoints")
     Call<RoutingResponse> getRouteWaypoints(@Body WaypointSearch waypointSearch);
+
+    @POST("routing/get_route_waypoints_test")
+    Call<RouteOptionsResponse> getRouteWaypointsTest();
 
 }

@@ -2,48 +2,39 @@ package aspace.trya.models.routing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ParkBikeOption {
+import java.io.Serializable;
+import java.util.List;
 
-    @JsonProperty("drive_park")
-    private RouteSegment driveParkSegment;
+public class ParkBikeOption implements Serializable {
 
-    @JsonProperty("bike_walk")
-    private RouteSegment bikeWalkSegment;
+    @JsonProperty("bbox")
+    private Bbox bbox;
 
-    @JsonProperty("park_bike")
-    private RouteSegment parkBikeSegment;
+    @JsonProperty("segments")
+    private List<RouteSegment> segments;
 
-    public RouteSegment getDriveParkSegment() {
-        return driveParkSegment;
+    public Bbox getBbox() {
+        return bbox;
     }
 
-    public void setDriveParkSegment(RouteSegment driveParkSegment) {
-        this.driveParkSegment = driveParkSegment;
+    public void setBbox(Bbox bbox) {
+        this.bbox = bbox;
     }
 
-    public RouteSegment getBikeWalkSegment() {
-        return bikeWalkSegment;
+    public List<RouteSegment> getSegments() {
+        return segments;
     }
 
-    public void setBikeWalkSegment(RouteSegment bikeWalkSegment) {
-        this.bikeWalkSegment = bikeWalkSegment;
-    }
-
-    public RouteSegment getParkBikeSegment() {
-        return parkBikeSegment;
-    }
-
-    public void setParkBikeSegment(RouteSegment parkBikeSegment) {
-        this.parkBikeSegment = parkBikeSegment;
+    public void setSegments(List<RouteSegment> segments) {
+        this.segments = segments;
     }
 
     @Override
     public String toString() {
         return
                 "ParkBikeOption{" +
-                        "drive_park = '" + driveParkSegment + '\'' +
-                        ",bike_walk = '" + bikeWalkSegment + '\'' +
-                        ",park_bike = '" + parkBikeSegment + '\'' +
+                        "bbox = '" + bbox + '\'' +
+                        ",segments = '" + segments + '\'' +
                         "}";
     }
 }

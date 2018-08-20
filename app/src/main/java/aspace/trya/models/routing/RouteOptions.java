@@ -2,74 +2,87 @@ package aspace.trya.models.routing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class RouteOptions {
+public class RouteOptions implements Serializable {
 
     @JsonProperty("park_direct")
-    private List<ParkDirectOption> parkDirect;
+    private List<ParkDirectOption> parkDirectOptions;
 
     @JsonProperty("origin")
     private LngLat origin;
+
+    @JsonProperty("bbox")
+    private Bbox bbox;
 
     @JsonProperty("destination")
     private LngLat destination;
 
     @JsonProperty("park_bike")
-    private List<ParkBikeOption> parkBike;
+    private List<ParkBikeOption> parkBikeOptions;
 
     @JsonProperty("park_walk")
-    private List<ParkWalkOption> parkWalk;
+    private List<ParkWalkOption> parkWalkOptions;
 
-    public List<ParkDirectOption> getParkDirect() {
-        return parkDirect;
+    public List<ParkDirectOption> getParkDirectOptions() {
+        return parkDirectOptions;
     }
 
-    public void setParkDirect(List<ParkDirectOption> parkDirect) {
-        this.parkDirect = parkDirect;
-    }
-
-    public LngLat getOrigin() {
-        return origin;
+    public void setParkDirectOptions(List<ParkDirectOption> parkDirectOptions) {
+        this.parkDirectOptions = parkDirectOptions;
     }
 
     public void setOrigin(LngLat origin) {
         this.origin = origin;
     }
 
-    public LngLat getDestination() {
-        return destination;
+    public LngLat getOrigin() {
+        return origin;
+    }
+
+    public Bbox getBbox() {
+        return bbox;
+    }
+
+    public void setBbox(Bbox bbox) {
+        this.bbox = bbox;
     }
 
     public void setDestination(LngLat destination) {
         this.destination = destination;
     }
 
-    public List<ParkBikeOption> getParkBike() {
-        return parkBike;
+    public LngLat getDestination() {
+        return destination;
     }
 
-    public void setParkBike(List<ParkBikeOption> parkBike) {
-        this.parkBike = parkBike;
+    public List<ParkBikeOption> getParkBikeOptions() {
+        return parkBikeOptions;
     }
 
-    public List<ParkWalkOption> getParkWalk() {
-        return parkWalk;
+    public void setParkBikeOptions(List<ParkBikeOption> parkBikeOptions) {
+        this.parkBikeOptions = parkBikeOptions;
     }
 
-    public void setParkWalk(List<ParkWalkOption> parkWalk) {
-        this.parkWalk = parkWalk;
+    public List<ParkWalkOption> getParkWalkOptions() {
+        return parkWalkOptions;
+    }
+
+    public void setParkWalkOptions(List<ParkWalkOption> parkWalkOptions) {
+        this.parkWalkOptions = parkWalkOptions;
     }
 
     @Override
     public String toString() {
         return
                 "RouteOptions{" +
-                        "park_direct = '" + parkDirect + '\'' +
+                        "park_direct = '" + parkDirectOptions + '\'' +
                         ",origin = '" + origin + '\'' +
+                        ",bbox = '" + bbox + '\'' +
                         ",destination = '" + destination + '\'' +
-                        ",park_bike = '" + parkBike + '\'' +
-                        ",park_walk = '" + parkWalk + '\'' +
+                        ",park_bike = '" + parkBikeOptions + '\'' +
+                        ",park_walk = '" + parkWalkOptions + '\'' +
                         "}";
     }
 }

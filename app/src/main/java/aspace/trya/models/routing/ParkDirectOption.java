@@ -2,36 +2,39 @@ package aspace.trya.models.routing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ParkDirectOption {
+import java.io.Serializable;
+import java.util.List;
 
-    @JsonProperty("drive_park")
-    private RouteSegment driveParkSegment;
+public class ParkDirectOption implements Serializable {
 
-    @JsonProperty("park_walk")
-    private RouteSegment parkWalkSegment;
+    @JsonProperty("bbox")
+    private Bbox bbox;
 
-    public RouteSegment getDriveParkSegment() {
-        return driveParkSegment;
+    @JsonProperty("segments")
+    private List<RouteSegment> segments;
+
+    public Bbox getBbox() {
+        return bbox;
     }
 
-    public void setDriveParkSegment(RouteSegment driveParkSegment) {
-        this.driveParkSegment = driveParkSegment;
+    public void setBbox(Bbox bbox) {
+        this.bbox = bbox;
     }
 
-    public RouteSegment getParkWalkSegment() {
-        return parkWalkSegment;
+    public List<RouteSegment> getSegments() {
+        return segments;
     }
 
-    public void setParkWalkSegment(RouteSegment parkWalkSegment) {
-        this.parkWalkSegment = parkWalkSegment;
+    public void setSegments(List<RouteSegment> segments) {
+        this.segments = segments;
     }
 
     @Override
     public String toString() {
         return
                 "ParkDirectOption{" +
-                        "drive_park = '" + driveParkSegment + '\'' +
-                        ",park_walk = '" + parkWalkSegment + '\'' +
+                        "bbox = '" + bbox + '\'' +
+                        ",segments = '" + segments + '\'' +
                         "}";
     }
 }

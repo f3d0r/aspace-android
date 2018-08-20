@@ -25,12 +25,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -45,6 +45,8 @@ import com.mypopsy.widget.FloatingSearchView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import aspace.trya.api.AspaceService;
+import aspace.trya.api.AspaceServiceGenerator;
 import aspace.trya.api.MapboxService;
 import aspace.trya.api.MapboxServiceGenerator;
 import aspace.trya.api.RetrofitLatLng;
@@ -54,6 +56,7 @@ import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.misc.MapUtils;
 import aspace.trya.misc.RouteOptionsListener;
+import aspace.trya.models.RoutingOptionsResponse;
 import aspace.trya.models.geojson.Feature;
 import aspace.trya.models.geojson.GeoJSON;
 import aspace.trya.search.ArrayRecyclerAdapter;
@@ -72,9 +75,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @BindView(R.id.current_location_button)
     FloatingActionButton btCurrentLocation;
     Menu menuSearchView;
-
-    @BindView(R.id.start_route_button)
-    Button btStartRoute;
 
     @BindView(R.id.zoom_in_warning_cardview)
     CardView cvZoomInWarning;
@@ -204,7 +204,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        mapUtils = new MapUtils(mapboxMap);
+        mapUtils = new MapUtils(mapboxMap, this);
         CameraPosition position = new CameraPosition.Builder()
                 .target(beginLocation)
                 .zoom(14)
@@ -259,7 +259,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         mapboxMap.addOnMapClickListener(point -> btCurrentLocation.setVisibility(View.VISIBLE));
 
-        getAndPopulateMarkers();
+//        getAndPopulateMarkers();
     }
 
     @Override
@@ -372,6 +372,21 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     }
 
+    @Override
+    public void routeOptionsParkBikeSelectorClicked(RouteOptions routeOptions) {
+
+    }
+
+    @Override
+    public void routeOptionsParkWalkSelectorClicked(RouteOptions routeOptions) {
+
+    }
+
+    @Override
+    public void routeOptionsParkDirectSelectorClicked(RouteOptions routeOptions) {
+
+    }
+
     private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, SuggestionViewHolder> {
         private LayoutInflater inflater;
 
@@ -421,21 +436,25 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                     floatingSearchView.setVisibility(View.INVISIBLE);
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-                    Bundle data = new Bundle();
-                    data.putSerializable("ORIGIN", routeOrigin);
-                    data.putSerializable("DESTINATION", clickedFeature);
-                    data.putInt("PREFFERED_ROUTE_METHOD", 0);
-
                     ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    RouteOptionsPreviewFragment fragment = RouteOptionsPreviewFragment.newInstance(routeOrigin, clickedFeature, 0);
-                    ft.replace(R.id.top_summary_view_fragment, fragment);
-                    ft.commit();
+
+                    AspaceServiceGenerator.createService(AspaceService.class).getRouteWaypointsTest().enqueue(new Callback<RoutingOptionsResponse>() {
+                        @Override
+                        public void onResponse(Call<RoutingOptionsResponse> call, Response<RoutingOptionsResponse> response) {
+                            RouteOptionsPreviewFragment fragment = RouteOptionsPreviewFragment.newInstance(routeOrigin, clickedFeature, response.body().getRouteOptions(), 0);
+                            mapUtils.zoomToBbox(response.body().getRouteOptions().getBbox().getLatLngBounds(), 3000);
+                            ft.replace(R.id.top_summary_view_fragment, fragment);
+                            ft.commit();
+                        }
+
+                        @Override
+                        public void onFailure(Call<RoutingOptionsResponse> call, Throwable t) {
+
+                        }
+                    });
+
                 });
-                if (clickedFeature.hasBbox()) {
-                    mapUtils.zoomToBbox(clickedFeature.getLatLngBounds(), 4000);
-                } else {
-                    mapUtils.zoomToLatLng(clickedFeature.getGeometry().getLatLng(), 3000);
-                }
+
             });
         }
 

@@ -15,12 +15,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import aspace.trya.R;
+import aspace.trya.api.AspaceService;
+import aspace.trya.api.AspaceServiceGenerator;
+import aspace.trya.misc.BundleIdentifiers;
 import aspace.trya.misc.RouteOptionsListener;
+import aspace.trya.models.RoutingOptionsResponse;
 import aspace.trya.models.geojson.Feature;
+import aspace.trya.models.routing.RouteOptions;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RouteOptionsPreviewFragment extends Fragment {
 
@@ -52,57 +60,21 @@ public class RouteOptionsPreviewFragment extends Fragment {
 
     private boolean[] routeOptionsSelected = {false, false, false};
 
-    public static RouteOptionsPreviewFragment newInstance(Feature routeOrigin, Feature routeDestination, int preferredRouteOption) {
+    private Feature origin;
+    private Feature destination;
+
+    private RouteOptions routeOptions;
+
+    public static RouteOptionsPreviewFragment newInstance(Feature routeOrigin, Feature routeDestination, RouteOptions routeOptions, int preferredRouteOptionIndex) {
         RouteOptionsPreviewFragment fragment = new RouteOptionsPreviewFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable("ORIGIN", routeOrigin);
-        bundle.putSerializable("DESTINATION", routeDestination);
-        bundle.putInt("PREFERRED_ROUTE_OPTION", preferredRouteOption);
+        bundle.putSerializable(BundleIdentifiers.ORIGIN_LOCATION, routeOrigin);
+        bundle.putSerializable(BundleIdentifiers.DESTINATION_LOCATION, routeDestination);
+        bundle.putSerializable(BundleIdentifiers.ROUTE_OPTIONS, routeOptions);
+        bundle.putInt(BundleIdentifiers.PREFERRED_ROUTE_OPTION_INDEX, preferredRouteOptionIndex);
         fragment.setArguments(bundle);
 
         return fragment;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup parent, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_route_options_preview, parent, false);
-        ButterKnife.bind(this, view);
-
-        Feature destination = (Feature) getArguments().getSerializable("DESTINATION");
-        tvEndLocation.setText(destination.getPlaceNameLine1());
-
-        carBikeSelector.setOnClickListener(v -> {
-            Arrays.fill(routeOptionsSelected, false);
-            resetRouteSelectorColors();
-            routeOptionsSelected[0] = true;
-            for (ImageView currentImageView : firstOptionImageViews) {
-                currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
-            }
-            carBikeSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        });
-
-        carWalkSelector.setOnClickListener(v -> {
-            Arrays.fill(routeOptionsSelected, false);
-            resetRouteSelectorColors();
-            routeOptionsSelected[1] = true;
-            for (ImageView currentImageView : secondOptionImageViews) {
-                currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
-            }
-            carWalkSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        });
-
-        cardDirectSelector.setOnClickListener(v -> {
-            Arrays.fill(routeOptionsSelected, false);
-            resetRouteSelectorColors();
-            routeOptionsSelected[2] = true;
-            for (ImageView currentImageView : thirdOptionImageViews) {
-                currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
-            }
-            cardDirectSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        });
-
-        return view;
     }
 
     @Override
@@ -145,5 +117,71 @@ public class RouteOptionsPreviewFragment extends Fragment {
     @OnClick(R.id.end_location_tv)
     public void destinationClicked() {
         mListener.routeOptionsDestinationSelectorClicked(cvRouteOptions);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup parent, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_route_options_preview, parent, false);
+        ButterKnife.bind(this, view);
+
+        origin = (Feature) getArguments().getSerializable(BundleIdentifiers.ORIGIN_LOCATION);
+        destination = (Feature) getArguments().getSerializable(BundleIdentifiers.DESTINATION_LOCATION);
+        tvEndLocation.setText(destination.getPlaceNameLine1());
+        routeOptions = (RouteOptions) getArguments().getSerializable(BundleIdentifiers.ROUTE_OPTIONS);
+
+        carBikeSelector.setOnClickListener(v -> {
+            Arrays.fill(routeOptionsSelected, false);
+            resetRouteSelectorColors();
+            routeOptionsSelected[0] = true;
+            for (ImageView currentImageView : firstOptionImageViews) {
+                currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
+            }
+            carBikeSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        });
+
+        carWalkSelector.setOnClickListener(v -> {
+            Arrays.fill(routeOptionsSelected, false);
+            resetRouteSelectorColors();
+            routeOptionsSelected[1] = true;
+            for (ImageView currentImageView : secondOptionImageViews) {
+                currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
+            }
+            carWalkSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        });
+
+        cardDirectSelector.setOnClickListener(v -> {
+            Arrays.fill(routeOptionsSelected, false);
+            resetRouteSelectorColors();
+            routeOptionsSelected[2] = true;
+            for (ImageView currentImageView : thirdOptionImageViews) {
+                currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
+            }
+            cardDirectSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        });
+
+        int preferredRouteOption = getArguments().getInt(BundleIdentifiers.PREFERRED_ROUTE_OPTION_INDEX, 0);
+        if (preferredRouteOption == 0) {
+            carBikeSelector.performClick();
+        } else if (preferredRouteOption == 1) {
+            carWalkSelector.performClick();
+        } else if (preferredRouteOption == 2) {
+            cardDirectSelector.performClick();
+        }
+
+        AspaceServiceGenerator.createService(AspaceService.class).getRouteWaypointsTest().enqueue(new Callback<RoutingOptionsResponse>() {
+            @Override
+            public void onResponse(Call<RoutingOptionsResponse> call, Response<RoutingOptionsResponse> response) {
+
+
+            }
+
+            @Override
+            public void onFailure(Call<RoutingOptionsResponse> call, Throwable t) {
+
+            }
+        });
+
+        return view;
     }
 }

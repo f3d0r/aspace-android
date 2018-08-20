@@ -2,12 +2,10 @@ package aspace.trya.api;
 
 import aspace.trya.bodyobjects.BoundingBox;
 import aspace.trya.bodyobjects.LngLat;
-import aspace.trya.bodyobjects.WaypointSearch;
 import aspace.trya.models.AuthResponse;
 import aspace.trya.models.CodeResponse;
 import aspace.trya.models.ParkingResponse;
-import aspace.trya.models.RoutingResponse;
-import aspace.trya.models.routing.RouteOptionsResponse;
+import aspace.trya.models.RoutingOptionsResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -45,10 +43,10 @@ public interface AspaceService {
     Call<ParkingResponse> getMinSizedParkingRadius(@Body LngLat lngLat, @Query("radius_feet") double radiusFeet, @Query("spot_size_feet") double spotSizeFeet);
 
     //Routing Endpoints
-    @POST("routing/get_route_waypoints")
-    Call<RoutingResponse> getRouteWaypoints(@Body WaypointSearch waypointSearch);
+//    @POST("routing/get_route_waypoints")
+//    Call<RoutingRes> getRouteWaypoints();
 
     @POST("routing/get_route_waypoints_test")
-    Call<RouteOptionsResponse> getRouteWaypointsTest();
+    Call<RoutingOptionsResponse> getRouteWaypointsTest();
 
 }

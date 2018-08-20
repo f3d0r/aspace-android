@@ -172,7 +172,7 @@ public class SplashScreen extends Activity {
                     if (startStep2(dialog)) {
                         //Now make sure about location permission.
                         if (checkPermissions()) {
-                            //Step 2: Start the Location Monitor Service
+                            //Step 2: LngLat the Location Monitor Service
                             //Everything is there to start the service.
                             startStep3();
                         } else if (!checkPermissions()) {
@@ -185,14 +185,14 @@ public class SplashScreen extends Activity {
     }
 
     /**
-     * Step 3: Start the Location Monitor Service
+     * Step 3: LngLat the Location Monitor Service
      */
     private void startStep3() {
         //And it will be keep running until you close the entire application from task manager.
         //This method will executed only once.
         if (!mAlreadyStartedService) {
 
-            //Start location sharing service to app server.........
+            //LngLat location sharing service to app server.........
             Intent intent = new Intent(this, LocationMonitoringService.class);
             startService(intent);
 
@@ -232,7 +232,7 @@ public class SplashScreen extends Activity {
     }
 
     /**
-     * Start permissions requests.
+     * LngLat permissions requests.
      */
     private void requestPermissions() {
         boolean shouldProvideRationale =

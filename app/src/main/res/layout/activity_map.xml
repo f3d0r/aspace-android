@@ -32,7 +32,7 @@
             android:ellipsize="end"
             android:hint="Where to?"
             android:singleLine="true"
-            app:fsv_contentBackgroundColor="@color/white"
+            app:fsv_contentBackgroundColor="@android:color/white"
             app:fsv_cornerRadius="3dp"
             app:fsv_menu="@menu/searchview_menu" />
 
@@ -74,6 +74,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" />
 
-    <include layout="@layout/route_options_preview" />
+    <!--<include layout="@layout/route_options_preview" />-->
 
 </android.support.design.widget.CoordinatorLayout>

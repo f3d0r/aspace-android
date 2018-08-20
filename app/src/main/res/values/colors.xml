@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#27B5FA</color>
     <color name="colorAccent">#4A9FFA</color>
 
-    <color name="white">#FFFFFF</color>
+    <color name="routeDriveColor">#23A1FF</color>
+    <color name="routeBikeColor">#30FC3E</color>
+    <color name="routeWalkColor">#A3B6BA</color>
 
 </resources>

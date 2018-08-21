@@ -95,9 +95,9 @@ public class RouteOptionsPreviewFragment extends Fragment {
     }
 
     public void resetRouteSelectorColors() {
-        carBikeSelector.setCardBackgroundColor(getResources().getColor(R.color.white));
-        carWalkSelector.setCardBackgroundColor(getResources().getColor(R.color.white));
-        cardDirectSelector.setCardBackgroundColor(getResources().getColor(R.color.white));
+        carBikeSelector.setCardBackgroundColor(getResources().getColor(android.R.color.white));
+        carWalkSelector.setCardBackgroundColor(getResources().getColor(android.R.color.white));
+        cardDirectSelector.setCardBackgroundColor(getResources().getColor(android.R.color.white));
         for (ImageView currentImageView : firstOptionImageViews) {
             currentImageView.setColorFilter(getResources().getColor(android.R.color.black));
         }

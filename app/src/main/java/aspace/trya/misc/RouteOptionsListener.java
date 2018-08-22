@@ -2,7 +2,8 @@ package aspace.trya.misc;
 
 import android.support.v7.widget.CardView;
 
-import com.mapbox.api.directions.v5.models.RouteOptions;
+import aspace.trya.models.routing.RouteOptions;
+
 
 public interface RouteOptionsListener {
     void routeOptionsOriginSelectorClicked(CardView cvRouteOptions);

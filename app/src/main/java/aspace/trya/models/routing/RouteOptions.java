@@ -1,9 +1,12 @@
 package aspace.trya.models.routing;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.List;
+
+import aspace.trya.models.DirectionsResponse;
 
 public class RouteOptions implements Serializable {
 

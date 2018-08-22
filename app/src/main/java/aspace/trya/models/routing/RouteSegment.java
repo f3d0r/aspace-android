@@ -1,8 +1,11 @@
 package aspace.trya.models.routing;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+
+import aspace.trya.models.DirectionsResponse;
 
 public class RouteSegment implements Serializable {
 
@@ -17,6 +20,17 @@ public class RouteSegment implements Serializable {
 
     @JsonProperty("end")
     private LngLat end;
+
+    @JsonIgnore
+    private DirectionsResponse directions;
+
+    public DirectionsResponse getDirections() {
+        return directions;
+    }
+
+    public void setDirections(DirectionsResponse directions) {
+        this.directions = directions;
+    }
 
     public String getPrettyName() {
         return prettyName;
@@ -59,5 +73,19 @@ public class RouteSegment implements Serializable {
                         ",start = '" + start + '\'' +
                         ",end = '" + end + '\'' +
                         "}";
+    }
+
+    public String getProfile() {
+        if (name.equals("drive_park")) {
+            return "mapbox/driving-traffic";
+        } else if (name.equals("walk_bike")) {
+            return "mapbox/walking";
+        } else if (name.equals("bike_dest")) {
+            return "mapbox/cycling";
+        } else if (name.equals("walk_dest")) {
+            return "mapbox/walking";
+        } else {
+            return "mapbox/driving-traffic";
+        }
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import aspace.trya.models.directions.Route;
 import aspace.trya.models.directions.Waypoint;
 
+
 public class DirectionsResponse {
 
     @JsonProperty("routes")

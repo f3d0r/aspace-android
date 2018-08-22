@@ -103,6 +103,8 @@ dependencies {
 
     // Dependency Injection
     implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+
 
     // Google Play Services
     implementation "com.google.android.gms:play-services-location:15.0.1"

@@ -1,19 +1,19 @@
 package aspace.trya.api;
 
-import com.mapbox.mapboxsdk.geometry.LatLng;
+import aspace.trya.models.routing.LngLat;
 
-class RouteCoordinates {
-    private LatLng origin;
-    private LatLng destination;
+public class RouteCoordinates {
+    private LngLat origin;
+    private LngLat destination;
 
-    public RouteCoordinates(LatLng origin, LatLng destination) {
+    public RouteCoordinates(LngLat origin, LngLat destination) {
         this.origin = origin;
         this.destination = destination;
     }
 
     @Override
     public String toString() {
-        return origin.getLongitude() + origin.getLatitude() + ";" + destination.getLongitude() + destination.getLatitude();
+        return origin.getLng() + origin.getLat() + ";" + destination.getLng() + destination.getLat();
     }
 }
 

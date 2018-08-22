@@ -2,10 +2,12 @@ package aspace.trya;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -30,7 +32,6 @@ import android.widget.TextView;
 
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -42,6 +43,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mypopsy.widget.FloatingSearchView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -50,19 +53,25 @@ import aspace.trya.api.AspaceServiceGenerator;
 import aspace.trya.api.MapboxService;
 import aspace.trya.api.MapboxServiceGenerator;
 import aspace.trya.api.RetrofitLatLng;
+import aspace.trya.api.RouteCoordinates;
 import aspace.trya.fragments.RouteOptionsPreviewFragment;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.misc.MapUtils;
 import aspace.trya.misc.RouteOptionsListener;
+import aspace.trya.models.DirectionsResponse;
 import aspace.trya.models.RoutingOptionsResponse;
 import aspace.trya.models.geojson.Feature;
 import aspace.trya.models.geojson.GeoJSON;
+import aspace.trya.models.routing.ParkBikeOption;
+import aspace.trya.models.routing.RouteOptions;
 import aspace.trya.search.ArrayRecyclerAdapter;
 import aspace.trya.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -374,17 +383,30 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     @Override
     public void routeOptionsParkBikeSelectorClicked(RouteOptions routeOptions) {
-
+        List<DirectionsResponse> directions = routeOptions.getDirectionsResponse();
+//        dashedLineDirectionsFeatureCollection = FeatureCollection.fromFeatures(new Feature[]{});
+//        GeoJsonSource geoJsonSource = new GeoJsonSource("SOURCE_ID", dashedLineDirectionsFeatureCollection);
+//        mapboxMap.addSource(geoJsonSource);
+//        LineLayer dashedDirectionsRouteLayer = new LineLayer(
+//                "DIRECTIONS_LAYER_ID", "SOURCE_ID");
+//        dashedDirectionsRouteLayer.withProperties(
+//                lineWidth(4.5f),
+//                lineColor(Color.BLACK),
+//                lineTranslate(new Float[]{0f, 4f}),
+//                lineDasharray(new Float[]{1.2f, 1.2f})
+//        );
+//        mapboxMap.addLayerBelow(dashedDirectionsRouteLayer, "road-label-small");
+        mapUtils.zoomToBbox(routeOptions.getParkBikeOptions().get(0).getBbox().getLatLngBounds(), 2000);
     }
 
     @Override
     public void routeOptionsParkWalkSelectorClicked(RouteOptions routeOptions) {
-
+        mapUtils.zoomToBbox(routeOptions.getParkWalkOptions().get(0).getBbox().getLatLngBounds(), 2000);
     }
 
     @Override
     public void routeOptionsParkDirectSelectorClicked(RouteOptions routeOptions) {
-
+        mapUtils.zoomToBbox(routeOptions.getParkDirectOptions().get(0).getBbox().getLatLngBounds(), 2000);
     }
 
     private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, SuggestionViewHolder> {
@@ -421,7 +443,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             goButton = itemView.findViewById(R.id.go_iv);
             mainAddress = itemView.findViewById(R.id.main_address_tv);
             cityState = itemView.findViewById(R.id.city_state_tv);
-            itemView.findViewById(R.id.address_layout).setOnClickListener(v -> {
+            itemView.findViewById(R.id.address_layout).setOnClickListener((View v) -> {
                 Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
                 KeyboardUtils.hideSoftKeyboard(getCurrentFocus(), getSystemService(INPUT_METHOD_SERVICE));
 
@@ -439,10 +461,40 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                     ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
 
                     AspaceServiceGenerator.createService(AspaceService.class).getRouteWaypointsTest().enqueue(new Callback<RoutingOptionsResponse>() {
+                        @SuppressLint("CheckResult")
                         @Override
                         public void onResponse(Call<RoutingOptionsResponse> call, Response<RoutingOptionsResponse> response) {
+                            MapboxService mapboxService = MapboxServiceGenerator.createService(MapboxService.class);
+                            ParkBikeOption parkBikeOption = response.body().getRouteOptions().getParkBikeOptions().get(0);
+                            RouteCoordinates routeCoordinates = new RouteCoordinates(parkBikeOption.getSegments().get(0).getStart(), parkBikeOption.getSegments().get(0).getEnd());
+                            Observable<DirectionsResponse> driveParkSegment = mapboxService.getDirections(parkBikeOption.getSegments().get(0).getProfile(), routeCoordinates, getResources().getString(R.string.mapbox_access_token));
+
+                            routeCoordinates = new RouteCoordinates(parkBikeOption.getSegments().get(1).getStart(), parkBikeOption.getSegments().get(1).getEnd());
+                            Observable<DirectionsResponse> walkBikeSegment = mapboxService.getDirections(parkBikeOption.getSegments().get(1).getProfile(), routeCoordinates, getResources().getString(R.string.mapbox_access_token));
+
+                            routeCoordinates = new RouteCoordinates(parkBikeOption.getSegments().get(2).getStart(), parkBikeOption.getSegments().get(2).getEnd());
+                            Observable<DirectionsResponse> bikeDestSegment = mapboxService.getDirections(parkBikeOption.getSegments().get(2).getProfile(), routeCoordinates, getResources().getString(R.string.mapbox_access_token));
+
+                            List<Observable> requests = new ArrayList<>();
+                            requests.add(driveParkSegment);
+                            requests.add(walkBikeSegment);
+                            requests.add(bikeDestSegment);
+
+                            Observable<Object[]> combined = Observable.zip(requests, new Function<List<DirectionsResponse>, Object[]>() {
+                                @Override
+                                public Object[] apply(List<DirectionsResponse> directionsResponses) throws Exception {
+                                    return new Object[0];
+                                }
+                            });
+
                             RouteOptionsPreviewFragment fragment = RouteOptionsPreviewFragment.newInstance(routeOrigin, clickedFeature, response.body().getRouteOptions(), 0);
-                            mapUtils.zoomToBbox(response.body().getRouteOptions().getBbox().getLatLngBounds(), 3000);
+                            mapUtils.zoomToBbox(response.body().
+
+                                    getRouteOptions().
+
+                                    getBbox().
+
+                                    getLatLngBounds(), 3000);
                             ft.replace(R.id.top_summary_view_fragment, fragment);
                             ft.commit();
                         }

@@ -15,28 +15,28 @@ public class VoiceInstructions implements Serializable {
     @JsonProperty("announcement")
     private String announcement;
 
-    public String getSsmlAnnouncement() {
-        return ssmlAnnouncement;
-    }
-
     public void setSsmlAnnouncement(String ssmlAnnouncement) {
         this.ssmlAnnouncement = ssmlAnnouncement;
     }
 
-    public double getDistanceAlongGeometry() {
-        return distanceAlongGeometry;
+    public String getSsmlAnnouncement() {
+        return ssmlAnnouncement;
     }
 
     public void setDistanceAlongGeometry(double distanceAlongGeometry) {
         this.distanceAlongGeometry = distanceAlongGeometry;
     }
 
-    public String getAnnouncement() {
-        return announcement;
+    public double getDistanceAlongGeometry() {
+        return distanceAlongGeometry;
     }
 
     public void setAnnouncement(String announcement) {
         this.announcement = announcement;
+    }
+
+    public String getAnnouncement() {
+        return announcement;
     }
 
     @Override

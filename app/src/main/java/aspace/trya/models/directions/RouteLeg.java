@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.List;
 
-public class Leg implements Serializable {
+public class RouteLeg implements Serializable {
 
     @JsonProperty("annotation")
     private Annotation annotation;
@@ -23,60 +23,60 @@ public class Leg implements Serializable {
     private double weight;
 
     @JsonProperty("steps")
-    private List<Step> steps;
-
-    public Annotation getAnnotation() {
-        return annotation;
-    }
+    private List<RouteStep> steps;
 
     public void setAnnotation(Annotation annotation) {
         this.annotation = annotation;
     }
 
-    public String getSummary() {
-        return summary;
+    public Annotation getAnnotation() {
+        return annotation;
     }
 
     public void setSummary(String summary) {
         this.summary = summary;
     }
 
-    public double getDuration() {
-        return duration;
+    public String getSummary() {
+        return summary;
     }
 
     public void setDuration(double duration) {
         this.duration = duration;
     }
 
-    public double getDistance() {
-        return distance;
+    public double getDuration() {
+        return duration;
     }
 
     public void setDistance(double distance) {
         this.distance = distance;
     }
 
-    public double getWeight() {
-        return weight;
+    public double getDistance() {
+        return distance;
     }
 
     public void setWeight(double weight) {
         this.weight = weight;
     }
 
-    public List<Step> getSteps() {
+    public double getWeight() {
+        return weight;
+    }
+
+    public List<RouteStep> getSteps() {
         return steps;
     }
 
-    public void setSteps(List<Step> steps) {
+    public void setSteps(List<RouteStep> steps) {
         this.steps = steps;
     }
 
     @Override
     public String toString() {
         return
-                "Leg{" +
+                "RouteLeg{" +
                         "annotation = '" + annotation + '\'' +
                         ",summary = '" + summary + '\'' +
                         ",duration = '" + duration + '\'' +

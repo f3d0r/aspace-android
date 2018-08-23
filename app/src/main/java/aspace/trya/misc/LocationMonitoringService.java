@@ -4,14 +4,12 @@ import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -19,7 +17,8 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+
+import timber.log.Timber;
 
 public class LocationMonitoringService extends Service implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -33,9 +32,7 @@ public class LocationMonitoringService extends Service implements
     LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
-            if (locationResult == null) {
-                return;
-            } else if (locationResult.getLocations().size() > 0) {
+            if (locationResult.getLocations().size() > 0) {
                 sendMessageToUI(String.valueOf(locationResult.getLocations().get(0).getLatitude()), String.valueOf(locationResult.getLocations().get(0).getLongitude()));
             }
         }
@@ -51,7 +48,6 @@ public class LocationMonitoringService extends Service implements
 
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(500);
-
 
         int priority = LocationRequest.PRIORITY_HIGH_ACCURACY; //by default
 
@@ -74,17 +70,10 @@ public class LocationMonitoringService extends Service implements
     @Override
     public void onConnected(Bundle dataBundle) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "== Error On onConnected() Permission not granted");
-            //Permission not granted by user so cancel the further execution.
-
+            Timber.d(TAG, "== Error On onConnected() Permission not granted");
             return;
         }
-        LocationServices.getFusedLocationProviderClient(this).getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                sendMessageToUI(location.getLatitude() + "", location.getLongitude() + "");
-            }
-        });
+        LocationServices.getFusedLocationProviderClient(this).getLastLocation().addOnSuccessListener(location -> sendMessageToUI(location.getLatitude() + "", location.getLongitude() + ""));
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
     }
 
@@ -94,13 +83,10 @@ public class LocationMonitoringService extends Service implements
      */
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(TAG, "Connection suspended");
+        Timber.d(TAG, "Connection suspended");
     }
 
     private void sendMessageToUI(String lat, String lng) {
-
-        Log.d(TAG, "Sending info...");
-
         Intent intent = new Intent(ACTION_LOCATION_BROADCAST);
         intent.putExtra(EXTRA_LATITUDE, lat);
         intent.putExtra(EXTRA_LONGITUDE, lng);
@@ -109,7 +95,6 @@ public class LocationMonitoringService extends Service implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(TAG, "Failed to connect to Google API");
-
+        Timber.d(TAG, "Failed to connect to Google API");
     }
 }

@@ -19,36 +19,36 @@ public class SecondaryContent implements Serializable {
     @JsonProperty("type")
     private String type;
 
-    public List<Component> getComponents() {
-        return components;
-    }
-
     public void setComponents(List<Component> components) {
         this.components = components;
     }
 
-    public String getModifier() {
-        return modifier;
+    public List<Component> getComponents() {
+        return components;
     }
 
     public void setModifier(String modifier) {
         this.modifier = modifier;
     }
 
-    public String getText() {
-        return text;
+    public String getModifier() {
+        return modifier;
     }
 
     public void setText(String text) {
         this.text = text;
     }
 
-    public String getType() {
-        return type;
+    public String getText() {
+        return text;
     }
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getType() {
+        return type;
     }
 
     @Override

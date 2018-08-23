@@ -5,7 +5,8 @@ import aspace.trya.bodyobjects.LngLat;
 import aspace.trya.models.AuthResponse;
 import aspace.trya.models.CodeResponse;
 import aspace.trya.models.ParkingResponse;
-import aspace.trya.models.RoutingOptionsResponse;
+import aspace.trya.models.RouteOptionsResponse;
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -46,7 +47,14 @@ public interface AspaceService {
 //    @POST("routing/get_route_waypoints")
 //    Call<RoutingRes> getRouteWaypoints();
 
-    @POST("routing/get_route_waypoints_test")
-    Call<RoutingOptionsResponse> getRouteWaypointsTest();
+    @POST("routing/get_drive_bike_route")
+    Observable<RouteOptionsResponse> getDriveBikeRoute(@Query("origin_lat") double originLat, @Query("origin_lng") double originLng, @Query("dest_lat") double destLat, @Query("dest_lng") double destLng);
+
+    @POST("routing/get_drive_walk_route")
+    Observable<RouteOptionsResponse> getDriveWalkWaypoints(@Query("origin_lat") double originLat, @Query("origin_lng") double originLng, @Query("dest_lat") double destLat, @Query("dest_lng") double destLng);
+
+    @POST("routing/get_drive_direct_route")
+    Observable<RouteOptionsResponse> getDriveDirectRoute(@Query("origin_lat") double originLat, @Query("origin_lng") double originLng, @Query("dest_lat") double destLat, @Query("dest_lng") double destLng);
+
 
 }

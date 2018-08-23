@@ -2,66 +2,101 @@ package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.List;
 
-import aspace.trya.models.directions.Route;
-import aspace.trya.models.directions.Waypoint;
+import aspace.trya.models.directions.RouteLeg;
 
+public class DirectionsResponse implements Serializable {
 
-public class DirectionsResponse {
+    @JsonProperty("duration")
+    private double duration;
 
-    @JsonProperty("routes")
-    private List<Route> routes;
+    @JsonProperty("distance")
+    private double distance;
 
-    @JsonProperty("code")
-    private String code;
+    @JsonProperty("voiceLocale")
+    private String voiceLocale;
 
-    @JsonProperty("waypoints")
-    private List<Waypoint> waypoints;
+    @JsonProperty("legs")
+    private List<RouteLeg> routeLegs;
 
-    @JsonProperty("uuid")
-    private String uuid;
+    @JsonProperty("weight_name")
+    private String weightName;
 
-    public List<Route> getRoutes() {
-        return routes;
+    @JsonProperty("weight")
+    private double weight;
+
+    @JsonProperty("geometry")
+    private String geometry;
+
+    public double getDuration() {
+        return duration;
     }
 
-    public void setRoutes(List<Route> routes) {
-        this.routes = routes;
+    public void setDuration(double duration) {
+        this.duration = duration;
     }
 
-    public String getCode() {
-        return code;
+    public double getDistance() {
+        return distance;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 
-    public List<Waypoint> getWaypoints() {
-        return waypoints;
+    public String getVoiceLocale() {
+        return voiceLocale;
     }
 
-    public void setWaypoints(List<Waypoint> waypoints) {
-        this.waypoints = waypoints;
+    public void setVoiceLocale(String voiceLocale) {
+        this.voiceLocale = voiceLocale;
     }
 
-    public String getUuid() {
-        return uuid;
+    public List<RouteLeg> getRouteLegs() {
+        return routeLegs;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setRouteLegs(List<RouteLeg> routeLegs) {
+        this.routeLegs = routeLegs;
+    }
+
+    public String getWeightName() {
+        return weightName;
+    }
+
+    public void setWeightName(String weightName) {
+        this.weightName = weightName;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+    public String getGeometry() {
+        return geometry;
+    }
+
+    public void setGeometry(String geometry) {
+        this.geometry = geometry;
     }
 
     @Override
     public String toString() {
         return
                 "DirectionsResponse{" +
-                        "routes = '" + routes + '\'' +
-                        ",code = '" + code + '\'' +
-                        ",waypoints = '" + waypoints + '\'' +
-                        ",uuid = '" + uuid + '\'' +
+                        "duration = '" + duration + '\'' +
+                        ",distance = '" + distance + '\'' +
+                        ",voiceLocale = '" + voiceLocale + '\'' +
+                        ",routeLegs = '" + routeLegs + '\'' +
+                        ",weight_name = '" + weightName + '\'' +
+                        ",weight = '" + weight + '\'' +
+                        ",geometry = '" + geometry + '\'' +
                         "}";
     }
 }

@@ -1,12 +1,12 @@
 package aspace.trya.api;
 
-import aspace.trya.models.routing.LngLat;
+import aspace.trya.models.routing_options.LatLng;
 
 public class RouteCoordinates {
-    private LngLat origin;
-    private LngLat destination;
+    private LatLng origin;
+    private LatLng destination;
 
-    public RouteCoordinates(LngLat origin, LngLat destination) {
+    public RouteCoordinates(LatLng origin, LatLng destination) {
         this.origin = origin;
         this.destination = destination;
     }

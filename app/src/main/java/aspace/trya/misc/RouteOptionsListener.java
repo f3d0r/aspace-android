@@ -2,7 +2,7 @@ package aspace.trya.misc;
 
 import android.support.v7.widget.CardView;
 
-import aspace.trya.models.routing.RouteOptions;
+import aspace.trya.models.RouteOptionsResponse;
 
 
 public interface RouteOptionsListener {
@@ -10,9 +10,9 @@ public interface RouteOptionsListener {
 
     void routeOptionsDestinationSelectorClicked(CardView cvRouteOptions);
 
-    void routeOptionsParkBikeSelectorClicked(RouteOptions routeOptions);
+    void routeOptionsParkBikeSelectorClicked(RouteOptionsResponse routeOptionsResponse, int optionSelected);
 
-    void routeOptionsParkWalkSelectorClicked(RouteOptions routeOptions);
+    void routeOptionsParkWalkSelectorClicked(RouteOptionsResponse routeOptionsResponse, int optionSelected);
 
-    void routeOptionsParkDirectSelectorClicked(RouteOptions routeOptions);
+    void routeOptionsParkDirectSelectorClicked(RouteOptionsResponse routeOptionsResponse, int optionSelected);
 }

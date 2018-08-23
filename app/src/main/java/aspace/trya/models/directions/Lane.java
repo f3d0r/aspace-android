@@ -13,20 +13,20 @@ public class Lane implements Serializable {
     @JsonProperty("indications")
     private List<String> indications;
 
-    public boolean isValid() {
-        return valid;
-    }
-
     public void setValid(boolean valid) {
         this.valid = valid;
     }
 
-    public List<String> getIndications() {
-        return indications;
+    public boolean isValid() {
+        return valid;
     }
 
     public void setIndications(List<String> indications) {
         this.indications = indications;
+    }
+
+    public List<String> getIndications() {
+        return indications;
     }
 
     @Override

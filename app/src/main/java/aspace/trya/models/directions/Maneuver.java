@@ -25,63 +25,52 @@ public class Maneuver implements Serializable {
     @JsonProperty("modifier")
     private String modifier;
 
-    @JsonProperty("exit")
-    private int exit;
-
-    public String getInstruction() {
-        return instruction;
-    }
-
     public void setInstruction(String instruction) {
         this.instruction = instruction;
     }
 
-    public int getBearingAfter() {
-        return bearingAfter;
+    public String getInstruction() {
+        return instruction;
     }
 
     public void setBearingAfter(int bearingAfter) {
         this.bearingAfter = bearingAfter;
     }
 
-    public int getBearingBefore() {
-        return bearingBefore;
+    public int getBearingAfter() {
+        return bearingAfter;
     }
 
     public void setBearingBefore(int bearingBefore) {
         this.bearingBefore = bearingBefore;
     }
 
-    public List<Double> getLocation() {
-        return location;
+    public int getBearingBefore() {
+        return bearingBefore;
     }
 
     public void setLocation(List<Double> location) {
         this.location = location;
     }
 
-    public String getType() {
-        return type;
+    public List<Double> getLocation() {
+        return location;
     }
 
     public void setType(String type) {
         this.type = type;
     }
 
-    public String getModifier() {
-        return modifier;
+    public String getType() {
+        return type;
     }
 
     public void setModifier(String modifier) {
         this.modifier = modifier;
     }
 
-    public int getExit() {
-        return exit;
-    }
-
-    public void setExit(int exit) {
-        this.exit = exit;
+    public String getModifier() {
+        return modifier;
     }
 
     @Override
@@ -94,7 +83,6 @@ public class Maneuver implements Serializable {
                         ",location = '" + location + '\'' +
                         ",type = '" + type + '\'' +
                         ",modifier = '" + modifier + '\'' +
-                        ",exit = '" + exit + '\'' +
                         "}";
     }
 }

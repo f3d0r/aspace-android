@@ -19,36 +19,36 @@ public class Annotation implements Serializable {
     @JsonProperty("speed")
     private List<Double> speed;
 
-    public List<Double> getDuration() {
-        return duration;
-    }
-
     public void setDuration(List<Double> duration) {
         this.duration = duration;
     }
 
-    public List<Double> getDistance() {
-        return distance;
+    public List<Double> getDuration() {
+        return duration;
     }
 
     public void setDistance(List<Double> distance) {
         this.distance = distance;
     }
 
-    public List<String> getCongestion() {
-        return congestion;
+    public List<Double> getDistance() {
+        return distance;
     }
 
     public void setCongestion(List<String> congestion) {
         this.congestion = congestion;
     }
 
-    public List<Double> getSpeed() {
-        return speed;
+    public List<String> getCongestion() {
+        return congestion;
     }
 
     public void setSpeed(List<Double> speed) {
         this.speed = speed;
+    }
+
+    public List<Double> getSpeed() {
+        return speed;
     }
 
     @Override

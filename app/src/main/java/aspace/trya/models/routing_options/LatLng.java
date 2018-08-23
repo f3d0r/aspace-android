@@ -1,10 +1,10 @@
-package aspace.trya.models.routing;
+package aspace.trya.models.routing_options;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
-public class LngLat implements Serializable {
+public class LatLng implements Serializable {
 
     @JsonProperty("lng")
     private double lng;
@@ -31,9 +31,13 @@ public class LngLat implements Serializable {
     @Override
     public String toString() {
         return
-                "Start{" +
+                "LatLng{" +
                         "lng = '" + lng + '\'' +
                         ",lat = '" + lat + '\'' +
                         "}";
+    }
+
+    public com.mapbox.mapboxsdk.geometry.LatLng getMapBoxLatLng() {
+        return new com.mapbox.mapboxsdk.geometry.LatLng(lat, lng);
     }
 }

@@ -1,25 +1,14 @@
 package aspace.trya.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class ParkingSpot {
 
-    @JsonProperty("lng")
     private double lng;
-
-    @JsonProperty("spot_id")
+    private double distance;
     private int spotId;
-
-    @JsonProperty("lat")
+    private double drivingTime;
     private double lat;
-
-    @JsonProperty("occupied")
     private String occupied;
-
-    @JsonProperty("block_id")
     private int blockId;
-
-    @JsonProperty("parking_price")
     private double parkingPrice;
 
     public double getLng() {
@@ -30,12 +19,28 @@ public class ParkingSpot {
         this.lng = lng;
     }
 
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
     public int getSpotId() {
         return spotId;
     }
 
     public void setSpotId(int spotId) {
         this.spotId = spotId;
+    }
+
+    public double getDrivingTime() {
+        return drivingTime;
+    }
+
+    public void setDrivingTime(double drivingTime) {
+        this.drivingTime = drivingTime;
     }
 
     public double getLat() {
@@ -72,13 +77,16 @@ public class ParkingSpot {
 
     @Override
     public String toString() {
-        return "ParkingSpot{" +
-                "lng=" + lng +
-                ", spotId=" + spotId +
-                ", lat=" + lat +
-                ", occupied='" + occupied + '\'' +
-                ", blockId=" + blockId +
-                ", parkingPrice=" + parkingPrice +
-                '}';
+        return
+            "ParkingSpot{" +
+                "lng = '" + lng + '\'' +
+                ",distance = '" + distance + '\'' +
+                ",spot_id = '" + spotId + '\'' +
+                ",driving_time = '" + drivingTime + '\'' +
+                ",lat = '" + lat + '\'' +
+                ",occupied = '" + occupied + '\'' +
+                ",block_id = '" + blockId + '\'' +
+                ",parking_price = '" + parkingPrice + '\'' +
+                "}";
     }
 }

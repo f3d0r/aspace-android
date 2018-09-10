@@ -10,20 +10,19 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-
 import timber.log.Timber;
 
 public class LocationMonitoringService extends Service implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+    GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    public static final String ACTION_LOCATION_BROADCAST = LocationMonitoringService.class.getName() + "LocationBroadcast";
+    public static final String ACTION_LOCATION_BROADCAST =
+        LocationMonitoringService.class.getName() + "LocationBroadcast";
     public static final String EXTRA_LATITUDE = "extra_latitude";
     public static final String EXTRA_LONGITUDE = "extra_longitude";
     private static final String TAG = LocationMonitoringService.class.getSimpleName();
@@ -33,7 +32,8 @@ public class LocationMonitoringService extends Service implements
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult.getLocations().size() > 0) {
-                sendMessageToUI(String.valueOf(locationResult.getLocations().get(0).getLatitude()), String.valueOf(locationResult.getLocations().get(0).getLongitude()));
+                sendMessageToUI(String.valueOf(locationResult.getLocations().get(0).getLatitude()),
+                    String.valueOf(locationResult.getLocations().get(0).getLongitude()));
             }
         }
     };
@@ -41,10 +41,10 @@ public class LocationMonitoringService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLocationClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
+            .addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this)
+            .addApi(LocationServices.API)
+            .build();
 
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(500);
@@ -69,12 +69,19 @@ public class LocationMonitoringService extends Service implements
      */
     @Override
     public void onConnected(Bundle dataBundle) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
             Timber.d(TAG, "== Error On onConnected() Permission not granted");
             return;
         }
-        LocationServices.getFusedLocationProviderClient(this).getLastLocation().addOnSuccessListener(location -> sendMessageToUI(location.getLatitude() + "", location.getLongitude() + ""));
-        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
+        LocationServices.getFusedLocationProviderClient(this).getLastLocation()
+            .addOnSuccessListener(
+                location -> sendMessageToUI(location.getLatitude() + "",
+                    location.getLongitude() + ""));
+        LocationServices.getFusedLocationProviderClient(this)
+            .requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
     }
 
     /*

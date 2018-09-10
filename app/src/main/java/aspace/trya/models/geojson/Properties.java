@@ -53,23 +53,23 @@ public class Properties {
         this.tel = tel;
     }
 
-    public void setWikidata(String wikidata) {
-        this.wikidata = wikidata;
-    }
-
     public String getWikidata() {
         return wikidata;
+    }
+
+    public void setWikidata(String wikidata) {
+        this.wikidata = wikidata;
     }
 
     @Override
     public String toString() {
         return
-                "Properties{" +
-                        "address = '" + address + '\'' +
-                        ",landmark = '" + landmark + '\'' +
-                        ",category = '" + category + '\'' +
-                        ",tel = '" + tel + '\'' +
-                        ",wikidata = '" + wikidata + '\'' +
-                        "}";
+            "Properties{" +
+                "address = '" + address + '\'' +
+                ",landmark = '" + landmark + '\'' +
+                ",category = '" + category + '\'' +
+                ",tel = '" + tel + '\'' +
+                ",wikidata = '" + wikidata + '\'' +
+                "}";
     }
 }

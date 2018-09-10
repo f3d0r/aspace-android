@@ -3,7 +3,6 @@ package aspace.trya.models.geojson;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,29 +14,29 @@ public class Geometry {
     @JsonProperty("type")
     private String type;
 
-    public void setCoordinates(List<Double> coordinates) {
-        this.coordinates = coordinates;
-    }
-
     private List<Double> getCoordinates() {
         return coordinates;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCoordinates(List<Double> coordinates) {
+        this.coordinates = coordinates;
     }
 
     public String getType() {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return
-                "Geometry{" +
-                        "coordinates = '" + coordinates + '\'' +
-                        ",type = '" + type + '\'' +
-                        "}";
+            "Geometry{" +
+                "coordinates = '" + coordinates + '\'' +
+                ",type = '" + type + '\'' +
+                "}";
     }
 
     public LatLng getLatLng() {

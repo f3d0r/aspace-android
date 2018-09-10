@@ -17,7 +17,7 @@
             android:id="@+id/map_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            mapbox:mapbox_styleUrl="@string/mapbox_style_mapbox_streets" />
+            mapbox:mapbox_styleUrl="@string/mapbox_style_mapbox_streets"/>
 
         <com.steelkiwi.library.SlidingSquareLoaderView
             android:id="@+id/loading_square_view"
@@ -31,41 +31,41 @@
             app:sslv_end_gradient_color="@color/colorAccent"
             app:sslv_margin="4dp"
             app:sslv_square_size="20dp"
-            app:sslv_start_gradient_color="@color/colorPrimary" />
+            app:sslv_start_gradient_color="@color/colorPrimary"/>
 
         <com.mypopsy.widget.FloatingSearchView
             android:id="@+id/floating_search_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:background="@android:color/white"
             android:divider="@android:color/white"
             android:dividerHeight="1dp"
             android:ellipsize="end"
             android:hint="Where to?"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="5dp"
             android:singleLine="true"
             app:fsv_contentBackgroundColor="@android:color/white"
             app:fsv_cornerRadius="3dp"
-            app:fsv_menu="@menu/searchview_menu" />
+            app:fsv_menu="@menu/searchview_menu"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/current_location_button"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_gravity="end|bottom"
             android:layout_marginBottom="20dp"
             android:layout_marginEnd="20dp"
+            android:layout_gravity="end|bottom"
             android:scaleType="center"
-            android:src="@drawable/ic_current_location_disabled" />
+            android:src="@drawable/ic_current_location_disabled"/>
 
         <android.support.v7.widget.CardView
             android:id="@+id/zoom_in_warning_cardview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
             android:layout_marginBottom="10dp"
+            android:layout_gravity="bottom|center"
             app:cardCornerRadius="3dp"
             app:cardElevation="5dp"
             app:cardUseCompatPadding="true">
@@ -74,11 +74,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:paddingTop="3dp"
                 android:paddingBottom="3dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
-                android:paddingTop="3dp"
-                android:text="Zoom in to view parking." />
+                android:text="Zoom in to view parking."/>
         </android.support.v7.widget.CardView>
     </FrameLayout>
 
@@ -86,8 +86,26 @@
         android:id="@+id/top_summary_view_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:orientation="vertical"/>
 
-    <!--<include layout="@layout/route_options_preview" />-->
+    <include
+        android:id="@+id/route_summary_fragment"
+        layout="@layout/fragment_route_summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:visibility="invisible"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/start_navigation_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:src="@drawable/ic_start_navigation"
+        android:tint="@android:color/white"
+        android:visibility="invisible"
+        app:layout_anchor="@+id/route_summary_fragment"
+        app:layout_anchorGravity="top|end"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -6,12 +6,12 @@
         android:icon="@drawable/ic_menu_close"
         android:title="Clear Search"
         android:visible="false"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/logout_menu_item"
         android:icon="@drawable/ic_logout"
         android:title="Clear Search"
         android:visible="true"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"/>
 </menu>

@@ -10,19 +10,20 @@
         android:id="@+id/tv_enterPin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="25dp"
+        android:layout_gravity="center"
         android:text="Please enter your PIN"
-        android:textSize="20sp" />
+        android:textSize="20sp"/>
 
     <com.alimuzaffar.lib.pin.PinEntryEditText
         android:id="@+id/txt_pin_entry"
+        android:textStyle="bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_marginTop="200dp"
         android:layout_marginLeft="35dp"
         android:layout_marginRight="35dp"
-        android:layout_marginTop="200dp"
+        android:layout_gravity="center"
         android:background="@null"
         android:cursorVisible="false"
         android:digits="1234567890"
@@ -30,18 +31,17 @@
         android:maxLength="6"
         android:textIsSelectable="false"
         android:textSize="32sp"
-        android:textStyle="bold"
         android:visibility="visible"
         app:pinAnimationType="fromBottom"
         app:pinBackgroundDrawable="@drawable/pin_background"
         app:pinLineStroke="2dp"
-        app:pinLineStrokeSelected="4dp" />
+        app:pinLineStrokeSelected="4dp"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="35dp"
         android:layout_marginTop="10dp"
+        android:layout_marginStart="35dp"
         android:orientation="horizontal">
 
         <TextView
@@ -50,17 +50,17 @@
             android:letterSpacing="0.05"
             android:text="Haven’t received a code yet?"
             android:textSize="16sp"
-            android:theme="@style/HavenTReceivedAC" />
+            android:theme="@style/HavenTReceivedAC"/>
 
         <TextView
             android:id="@+id/sendAgainButton"
             android:layout_width="fill_parent"
-            android:layout_marginStart="25dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
             android:text="Send Again"
             android:textColor="@color/colorAccent"
             android:textSize="16sp"
-            android:theme="@style/SendAgain" />
+            android:theme="@style/SendAgain"/>
     </LinearLayout>
 
     <LinearLayout
@@ -73,21 +73,21 @@
             android:id="@+id/buttonBack"
             android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:layout_marginEnd="1dp"
             android:layout_weight="1"
+            android:layout_marginEnd="1dp"
             android:background="@drawable/button_light_bg"
             android:text="Back"
-            android:theme="@style/ButtonText" />
+            android:theme="@style/ButtonText"/>
 
         <Button
             android:id="@+id/buttonContinue"
             android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:layout_marginStart="1dp"
             android:layout_weight="1"
+            android:layout_marginStart="1dp"
             android:background="@drawable/button_dark_bg"
             android:text="Next"
-            android:theme="@style/ButtonText" />
+            android:theme="@style/ButtonText"/>
 
     </LinearLayout>
 

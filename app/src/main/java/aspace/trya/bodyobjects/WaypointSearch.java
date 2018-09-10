@@ -40,10 +40,10 @@ public class WaypointSearch {
     @Override
     public String toString() {
         return
-                "WaypointSearch{" +
-                        "car_size = '" + carSize + '\'' +
-                        ",origin = '" + origin + '\'' +
-                        ",dest = '" + dest + '\'' +
-                        "}";
+            "WaypointSearch{" +
+                "car_size = '" + carSize + '\'' +
+                ",origin = '" + origin + '\'' +
+                ",dest = '" + dest + '\'' +
+                "}";
     }
 }

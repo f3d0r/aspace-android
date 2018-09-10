@@ -1,6 +1,7 @@
 package aspace.trya.api;
 
 public final class AspaceResponseCodes {
+
     public static final int VALID_OR_MISSING_OUTPUT_TYPE = -7;
     public static final int INVALID_PARAMETER = -6;
     public static final int MULTI_PART_BODY_MISSING = -5;

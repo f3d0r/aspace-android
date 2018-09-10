@@ -10,19 +10,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.Arrays;
-import java.util.List;
-
 import aspace.trya.R;
+import aspace.trya.listeners.RouteOptionsListener;
 import aspace.trya.misc.BundleIdentifiers;
-import aspace.trya.misc.RouteOptionsListener;
 import aspace.trya.models.RouteOptionsResponse;
 import aspace.trya.models.geojson.Feature;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import java.util.Arrays;
+import java.util.List;
 
 public class RouteOptionsPreviewFragment extends Fragment {
 
@@ -41,10 +39,12 @@ public class RouteOptionsPreviewFragment extends Fragment {
     @BindView(R.id.route_options_card_view)
     CardView cvRouteOptions;
 
-    @BindViews({R.id.first_option_car_iv, R.id.first_option_then1_iv, R.id.first_option_park_iv, R.id.first_option_then2_iv, R.id.first_option_bike_iv})
+    @BindViews({R.id.first_option_car_iv, R.id.first_option_then1_iv, R.id.first_option_park_iv,
+        R.id.first_option_then2_iv, R.id.first_option_bike_iv})
     List<ImageView> firstOptionImageViews;
 
-    @BindViews({R.id.second_option_car_iv, R.id.second_option_then1_iv, R.id.second_option_park_iv, R.id.second_option_then2_iv, R.id.second_option_walk_iv})
+    @BindViews({R.id.second_option_car_iv, R.id.second_option_then1_iv, R.id.second_option_park_iv,
+        R.id.second_option_then2_iv, R.id.second_option_walk_iv})
     List<ImageView> secondOptionImageViews;
 
     @BindViews({R.id.third_option_car_iv, R.id.third_option_then_iv, R.id.third_option_park_iv})
@@ -59,7 +59,9 @@ public class RouteOptionsPreviewFragment extends Fragment {
 
     private RouteOptionsResponse[] routeOptions;
 
-    public static RouteOptionsPreviewFragment newInstance(Feature routeOrigin, Feature routeDestination, RouteOptionsResponse[] routeOptions, int preferredRouteOptionIndex) {
+    public static RouteOptionsPreviewFragment newInstance(Feature routeOrigin,
+        Feature routeDestination, RouteOptionsResponse[] routeOptions,
+        int preferredRouteOptionIndex) {
         RouteOptionsPreviewFragment fragment = new RouteOptionsPreviewFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(BundleIdentifiers.ORIGIN_LOCATION, routeOrigin);
@@ -78,7 +80,7 @@ public class RouteOptionsPreviewFragment extends Fragment {
             mListener = (RouteOptionsListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -115,16 +117,19 @@ public class RouteOptionsPreviewFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup parent, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup parent,
+        Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_route_options_preview, parent, false);
         ButterKnife.bind(this, view);
 
         origin = (Feature) getArguments().getSerializable(BundleIdentifiers.ORIGIN_LOCATION);
-        destination = (Feature) getArguments().getSerializable(BundleIdentifiers.DESTINATION_LOCATION);
+        destination = (Feature) getArguments()
+            .getSerializable(BundleIdentifiers.DESTINATION_LOCATION);
         tvEndLocation.setText(destination.getPlaceNameLine1());
-        routeOptions = (RouteOptionsResponse[]) getArguments().getSerializable(BundleIdentifiers.ROUTE_OPTIONS);
-        routeOptionsSelected[getArguments().getInt(BundleIdentifiers.PREFERRED_ROUTE_OPTION_INDEX)] = true;
-
+        routeOptions = (RouteOptionsResponse[]) getArguments()
+            .getSerializable(BundleIdentifiers.ROUTE_OPTIONS);
+        routeOptionsSelected[getArguments()
+            .getInt(BundleIdentifiers.PREFERRED_ROUTE_OPTION_INDEX)] = true;
 
         carBikeSelector.setOnClickListener(v -> {
             Arrays.fill(routeOptionsSelected, false);
@@ -133,7 +138,8 @@ public class RouteOptionsPreviewFragment extends Fragment {
             for (ImageView currentImageView : firstOptionImageViews) {
                 currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
             }
-            carBikeSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            carBikeSelector
+                .setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
             mListener.routeOptionsParkBikeSelectorClicked(routeOptions[0], 0);
         });
 
@@ -144,7 +150,8 @@ public class RouteOptionsPreviewFragment extends Fragment {
             for (ImageView currentImageView : secondOptionImageViews) {
                 currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
             }
-            carWalkSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            carWalkSelector
+                .setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
             mListener.routeOptionsParkWalkSelectorClicked(routeOptions[1], 0);
         });
 
@@ -155,11 +162,13 @@ public class RouteOptionsPreviewFragment extends Fragment {
             for (ImageView currentImageView : thirdOptionImageViews) {
                 currentImageView.setColorFilter(getResources().getColor(android.R.color.white));
             }
-            cardDirectSelector.setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            cardDirectSelector
+                .setCardBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
             mListener.routeOptionsParkDirectSelectorClicked(routeOptions[2], 0);
         });
 
-        int preferredRouteOption = getArguments().getInt(BundleIdentifiers.PREFERRED_ROUTE_OPTION_INDEX, 0);
+        int preferredRouteOption = getArguments()
+            .getInt(BundleIdentifiers.PREFERRED_ROUTE_OPTION_INDEX, 0);
         if (preferredRouteOption == 0) {
             carBikeSelector.performClick();
         } else if (preferredRouteOption == 1) {

@@ -10,36 +10,36 @@
         android:id="@+id/profile_image"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        android:layout_gravity="center"
         android:layout_marginTop="75dp"
-        android:src="@drawable/circle_logo_icon" />
+        android:layout_gravity="center"
+        android:src="@drawable/circle_logo_icon"/>
 
     <TextView
+        android:textStyle="bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="15dp"
+        android:layout_gravity="center"
         android:fontFamily="sans-serif"
         android:text="What's your phone #?"
         android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textSize="18sp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="5dp"
+        android:layout_gravity="center"
         android:fontFamily="sans-serif"
         android:text="We'll use it to confirm your account."
         android:textColor="#000000"
-        android:textSize="14sp" />
+        android:textSize="14sp"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="25dp"
+        android:layout_gravity="center_horizontal"
         android:orientation="horizontal">
 
         <com.hbb20.CountryCodePicker
@@ -47,9 +47,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            app:ccp_customMasterCountries="US"
             app:ccp_autoDetectCountry="true"
-            app:ccp_textSize="24sp" />
+            app:ccp_customMasterCountries="US"
+            app:ccp_textSize="24sp"/>
 
         <EditText
             android:id="@+id/et_phone_number"
@@ -60,7 +60,7 @@
             android:inputType="phone"
             android:lines="1"
             android:maxLength="14"
-            android:textSize="24sp" />
+            android:textSize="24sp"/>
 
     </LinearLayout>
 
@@ -78,7 +78,7 @@
             android:layout_marginEnd="1dp"
             android:background="@drawable/button_nav"
             android:text="Login"
-            android:theme="@style/ButtonText" />
+            android:theme="@style/ButtonText"/>
 
     </LinearLayout>
 

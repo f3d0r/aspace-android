@@ -1,11 +1,9 @@
-package aspace.trya.models.directions;
+package aspace.trya.models.osrm_directions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
 import java.util.List;
 
-public class Lane implements Serializable {
+public class Lane {
 
     @JsonProperty("valid")
     private boolean valid;
@@ -32,9 +30,9 @@ public class Lane implements Serializable {
     @Override
     public String toString() {
         return
-                "Lane{" +
-                        "valid = '" + valid + '\'' +
-                        ",indications = '" + indications + '\'' +
-                        "}";
+            "Lane{" +
+                "valid = '" + valid + '\'' +
+                ",indications = '" + indications + '\'' +
+                "}";
     }
 }

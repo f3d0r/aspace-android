@@ -4,14 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-
-import com.github.paolorotolo.appintro.AppIntro2;
-
 import aspace.trya.fragments.OnboardingSlide1;
 import aspace.trya.fragments.OnboardingSlide2;
+import com.github.paolorotolo.appintro.AppIntro2;
 
 
 public class OnboardingActivity extends AppIntro2 {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

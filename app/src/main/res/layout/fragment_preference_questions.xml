@@ -9,30 +9,30 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="18dp"
         android:layout_marginTop="25dp"
+        android:layout_marginStart="18dp"
         android:text="Preference Questions"
-        android:theme="@style/Headline" />
+        android:theme="@style/Headline"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="18dp"
         android:layout_marginTop="10dp"
+        android:layout_marginStart="18dp"
         android:letterSpacing="0.05"
         android:lineSpacingMultiplier="1.32"
         android:text="Tell us more about you!"
-        android:theme="@style/Body2" />
+        android:theme="@style/Body2"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="18dp"
         android:layout_marginTop="55dp"
+        android:layout_marginStart="18dp"
         android:letterSpacing="0.05"
         android:lineSpacingMultiplier="1.21"
         android:text="How many people do you usually drive with?"
-        android:theme="@style/HowManyPeopleDoY" />
+        android:theme="@style/HowManyPeopleDoY"/>
 
     <com.ramotion.fluidslider.FluidSlider
         android:layout_width="match_parent"
@@ -42,17 +42,17 @@
         app:end_text="$$$"
         app:size="normal"
         app:start_text="$"
-        app:text_size="18sp" />
+        app:text_size="18sp"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="18dp"
         android:layout_marginTop="15dp"
+        android:layout_marginStart="18dp"
         android:letterSpacing="0.05"
         android:lineSpacingMultiplier="1.21"
         android:text="What's your budget?"
-        android:theme="@style/HowManyPeopleDoY" />
+        android:theme="@style/HowManyPeopleDoY"/>
 
     <com.ramotion.fluidslider.FluidSlider
         android:layout_width="match_parent"
@@ -62,7 +62,7 @@
         app:end_text="5"
         app:size="normal"
         app:start_text="1"
-        app:text_size="18sp" />
+        app:text_size="18sp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -74,21 +74,21 @@
             android:id="@+id/buttonBack"
             android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:layout_marginEnd="1dp"
             android:layout_weight="1"
+            android:layout_marginEnd="1dp"
             android:background="@drawable/button_nav"
             android:text="Back"
-            android:theme="@style/ButtonText" />
+            android:theme="@style/ButtonText"/>
 
         <Button
             android:id="@+id/buttonContinue"
             android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:layout_marginStart="1dp"
             android:layout_weight="1"
+            android:layout_marginStart="1dp"
             android:background="@drawable/button_nav"
             android:text="Done"
-            android:theme="@style/ButtonText" />
+            android:theme="@style/ButtonText"/>
 
     </LinearLayout>
 </LinearLayout>

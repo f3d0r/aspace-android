@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,127 +44,6 @@ public class Feature implements Serializable {
     @JsonProperty("bbox")
     private List<Double> bbox;
 
-    private void setPlaceName(String placeName) {
-        this.placeName = placeName;
-    }
-
-    public String getPlaceName() {
-        return placeName;
-    }
-
-    private void setPlaceType(List<String> placeType) {
-        this.placeType = placeType;
-    }
-
-    public List<String> getPlaceType() {
-        return placeType;
-    }
-
-    public void setCenter(List<Double> center) {
-        this.center = center;
-    }
-
-    public List<Double> getCenter() {
-        return center;
-    }
-
-    public void setContext(List<Context> context) {
-        this.context = context;
-    }
-
-    public List<Context> getContext() {
-        return context;
-    }
-
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
-
-    public Geometry getGeometry() {
-        return geometry;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public int getRelevance() {
-        return relevance;
-    }
-
-    public void setRelevance(int relevance) {
-        this.relevance = relevance;
-    }
-
-    public void setProperties(Properties properties) {
-        this.properties = properties;
-    }
-
-    public Properties getProperties() {
-        return properties;
-    }
-
-    private List<Double> getBbox() {
-        return bbox;
-    }
-
-    public void setBbox(List<Double> bbox) {
-        this.bbox = bbox;
-    }
-
-    @Override
-    public String toString() {
-        return
-                "Feature{" +
-                        "place_name = '" + placeName + '\'' +
-                        ",place_type = '" + placeType + '\'' +
-                        ",center = '" + center + '\'' +
-                        ",context = '" + context + '\'' +
-                        ",geometry = '" + geometry + '\'' +
-                        ",id = '" + id + '\'' +
-                        ",text = '" + text + '\'' +
-                        ",type = '" + type + '\'' +
-                        ",relevance = '" + relevance + '\'' +
-                        ",properties = '" + properties + '\'' +
-                        ",bbox = '" + bbox + '\'' +
-                        "}";
-    }
-
-    public boolean hasBbox() {
-        return getBbox() != null && getBbox().size() != 0;
-    }
-
-    public LatLngBounds getLatLngBounds() {
-        if (getBbox() == null || getBbox().size() == 0) {
-            return null;
-        } else {
-            return new LatLngBounds.Builder()
-                    .include(new LatLng(getBbox().get(1), getBbox().get(0)))
-                    .include(new LatLng(getBbox().get(3), getBbox().get(2)))
-                    .build();
-        }
-    }
-
     public Feature() {
     }
 
@@ -183,6 +61,127 @@ public class Feature implements Serializable {
         }
     }
 
+    public String getPlaceName() {
+        return placeName;
+    }
+
+    private void setPlaceName(String placeName) {
+        this.placeName = placeName;
+    }
+
+    public List<String> getPlaceType() {
+        return placeType;
+    }
+
+    private void setPlaceType(List<String> placeType) {
+        this.placeType = placeType;
+    }
+
+    public List<Double> getCenter() {
+        return center;
+    }
+
+    public void setCenter(List<Double> center) {
+        this.center = center;
+    }
+
+    public List<Context> getContext() {
+        return context;
+    }
+
+    public void setContext(List<Context> context) {
+        this.context = context;
+    }
+
+    public Geometry getGeometry() {
+        return geometry;
+    }
+
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getRelevance() {
+        return relevance;
+    }
+
+    public void setRelevance(int relevance) {
+        this.relevance = relevance;
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
+    }
+
+    private List<Double> getBbox() {
+        return bbox;
+    }
+
+    public void setBbox(List<Double> bbox) {
+        this.bbox = bbox;
+    }
+
+    @Override
+    public String toString() {
+        return
+            "Feature{" +
+                "place_name = '" + placeName + '\'' +
+                ",place_type = '" + placeType + '\'' +
+                ",center = '" + center + '\'' +
+                ",context = '" + context + '\'' +
+                ",geometry = '" + geometry + '\'' +
+                ",id = '" + id + '\'' +
+                ",text = '" + text + '\'' +
+                ",type = '" + type + '\'' +
+                ",relevance = '" + relevance + '\'' +
+                ",properties = '" + properties + '\'' +
+                ",bbox = '" + bbox + '\'' +
+                "}";
+    }
+
+    public boolean hasBbox() {
+        return getBbox() != null && getBbox().size() != 0;
+    }
+
+    public LatLngBounds getLatLngBounds() {
+        if (getBbox() == null || getBbox().size() == 0) {
+            return null;
+        } else {
+            return new LatLngBounds.Builder()
+                .include(new LatLng(getBbox().get(1), getBbox().get(0)))
+                .include(new LatLng(getBbox().get(3), getBbox().get(2)))
+                .build();
+        }
+    }
+
     public String getPlaceNameLine1() {
         return getPlaceName().substring(0, getPlaceName().indexOf(", "));
     }
@@ -191,4 +190,15 @@ public class Feature implements Serializable {
         return getPlaceName().substring(getPlaceName().indexOf(", ") + 2);
     }
 
+    public LatLng getLatLng() {
+        return new LatLng(getCenter().get(1), getCenter().get(0));
+    }
+
+    public double getLatitude() {
+        return center.get(1);
+    }
+
+    public double getLongitude() {
+        return center.get(0);
+    }
 }

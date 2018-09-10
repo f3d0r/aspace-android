@@ -21,15 +21,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-
-import aspace.trya.api.AspaceService;
-import aspace.trya.api.AspaceServiceGenerator;
+import aspace.trya.api.AspaceMainService;
+import aspace.trya.api.RetrofitServiceGenerator;
+import aspace.trya.misc.APIURLs;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.models.CodeResponse;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -52,17 +51,19 @@ public class SplashScreen extends Activity {
 
         startStep1();
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String latitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
-                        String longitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
-                        if (latitude != null && longitude != null && !locationReceived) {
-                            locationReceived = true;
-                            checkUserLoggedIn(latitude, longitude);
-                        }
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String latitude = intent
+                        .getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
+                    String longitude = intent
+                        .getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
+                    if (latitude != null && longitude != null && !locationReceived) {
+                        locationReceived = true;
+                        checkUserLoggedIn(latitude, longitude);
                     }
-                }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
+                }
+            }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
         );
 
         setContentView(R.layout.activity_splash);
@@ -80,7 +81,10 @@ public class SplashScreen extends Activity {
         if (loggedInAccessCode == null) {
             getLocationAndSend(LoginActivity.class);
         } else {
-            Call<CodeResponse> call = AspaceServiceGenerator.createService(AspaceService.class).checkAuth(loggedInAccessCode, applicationState.getDeviceId());
+            Call<CodeResponse> call = RetrofitServiceGenerator
+                .createService(AspaceMainService.class,
+                    APIURLs.ASPACE_MAIN_PROD_URL)
+                .checkAuth(loggedInAccessCode, applicationState.getDeviceId());
             call.enqueue(new Callback<CodeResponse>() {
                 @Override
                 public void onResponse(Call<CodeResponse> call, Response<CodeResponse> response) {
@@ -103,7 +107,8 @@ public class SplashScreen extends Activity {
 
     public void getLocationAndSend(Class throughClass) {
         Intent intent = new Intent(SplashScreen.this, throughClass);
-        ActivityOptions options = ActivityOptions.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out);
+        ActivityOptions options = ActivityOptions
+            .makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out);
         startActivity(intent, options.toBundle());
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
@@ -127,7 +132,8 @@ public class SplashScreen extends Activity {
             //Passing null to indicate that it is executing for the first time.
             startStep2(null);
         } else {
-            Toast.makeText(getApplicationContext(), "NO GOOGLE PLAY SERVICES", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "NO GOOGLE PLAY SERVICES", Toast.LENGTH_LONG)
+                .show();
         }
     }
 
@@ -137,7 +143,7 @@ public class SplashScreen extends Activity {
      */
     private Boolean startStep2(DialogInterface dialog) {
         ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
@@ -167,19 +173,19 @@ public class SplashScreen extends Activity {
 
         String positiveText = "Refresh";
         builder.setPositiveButton(positiveText,
-                (dialog, which) -> {
-                    //Block the Application Execution until user grants the permissions
-                    if (startStep2(dialog)) {
-                        //Now make sure about location permission.
-                        if (checkPermissions()) {
-                            //Step 2: LngLat the Location Monitor Service
-                            //Everything is there to start the service.
-                            startStep3();
-                        } else if (!checkPermissions()) {
-                            requestPermissions();
-                        }
+            (dialog, which) -> {
+                //Block the Application Execution until user grants the permissions
+                if (startStep2(dialog)) {
+                    //Now make sure about location permission.
+                    if (checkPermissions()) {
+                        //Step 2: LngLat the Location Monitor Service
+                        //Everything is there to start the service.
+                        startStep3();
+                    } else if (!checkPermissions()) {
+                        requestPermissions();
                     }
-                });
+                }
+            });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -222,12 +228,13 @@ public class SplashScreen extends Activity {
      */
     private boolean checkPermissions() {
         int permissionState1 = ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION);
+            android.Manifest.permission.ACCESS_FINE_LOCATION);
 
         int permissionState2 = ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION);
+            Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        return permissionState1 == PackageManager.PERMISSION_GRANTED && permissionState2 == PackageManager.PERMISSION_GRANTED;
+        return permissionState1 == PackageManager.PERMISSION_GRANTED
+            && permissionState2 == PackageManager.PERMISSION_GRANTED;
 
     }
 
@@ -236,20 +243,22 @@ public class SplashScreen extends Activity {
      */
     private void requestPermissions() {
         boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION);
+            ActivityCompat.shouldShowRequestPermissionRationale(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION);
         boolean shouldProvideRationale2 =
-                ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION);
+            ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
         if (shouldProvideRationale || shouldProvideRationale2) {
             showSnackbar("Requesting Permission",
-                    "OK?", view -> ActivityCompat.requestPermissions(SplashScreen.this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                            REQUEST_PERMISSIONS_REQUEST_CODE));
+                "OK?", view -> ActivityCompat.requestPermissions(SplashScreen.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION},
+                    REQUEST_PERMISSIONS_REQUEST_CODE));
         } else {
             ActivityCompat.requestPermissions(SplashScreen.this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQUEST_PERMISSIONS_REQUEST_CODE);
+                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION},
+                REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
 
@@ -258,16 +267,16 @@ public class SplashScreen extends Activity {
      * Shows a {@link Snackbar}.
      *
      * @param mainTextString The id for the string resource for the Snackbar text.
-     * @param actionString   The text of the action item.
-     * @param listener       The listener associated with the Snackbar action.
+     * @param actionString The text of the action item.
+     * @param listener The listener associated with the Snackbar action.
      */
     private void showSnackbar(String mainTextString, String actionString,
-                              View.OnClickListener listener) {
+        View.OnClickListener listener) {
         Snackbar.make(
-                findViewById(android.R.id.content),
-                mainTextString,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(actionString, listener).show();
+            findViewById(android.R.id.content),
+            mainTextString,
+            Snackbar.LENGTH_INDEFINITE)
+            .setAction(actionString, listener).show();
     }
 
     /**
@@ -275,23 +284,23 @@ public class SplashScreen extends Activity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+        @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startStep3();
             } else {
                 showSnackbar("Permission was denied",
-                        "Settings", view -> {
-                            // Build intent that displays the App settings screen.
-                            Intent intent = new Intent();
-                            intent.setAction(
-                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package",
-                                    BuildConfig.APPLICATION_ID, null);
-                            intent.setData(uri);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        });
+                    "Settings", view -> {
+                        // Build intent that displays the App settings screen.
+                        Intent intent = new Intent();
+                        intent.setAction(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package",
+                            BuildConfig.APPLICATION_ID, null);
+                        intent.setData(uri);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    });
             }
         }
     }

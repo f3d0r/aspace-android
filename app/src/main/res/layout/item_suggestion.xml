@@ -14,18 +14,18 @@
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:contentDescription="Location Type"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"/>
 
     <LinearLayout
         android:id="@+id/address_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
         android:layout_weight="1"
-        android:background="@android:color/transparent"
-        android:orientation="vertical"
+        android:layout_marginStart="4dp"
+        android:paddingTop="4dp"
         android:paddingBottom="4dp"
-        android:paddingTop="4dp">
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/main_address_tv"
@@ -34,7 +34,7 @@
             android:layout_gravity="start|center_vertical"
             android:background="@android:color/transparent"
             android:ellipsize="end"
-            android:textAppearance="?android:attr/textAppearanceSearchResultTitle" />
+            android:textAppearance="?android:attr/textAppearanceSearchResultTitle"/>
 
         <TextView
             android:id="@+id/city_state_tv"
@@ -44,7 +44,7 @@
             android:background="@android:color/transparent"
             android:ellipsize="end"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceSearchResultSubtitle" />
+            android:textAppearance="?android:attr/textAppearanceSearchResultSubtitle"/>
     </LinearLayout>
 
     <ImageView
@@ -54,6 +54,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@android:color/transparent"
-        android:contentDescription="Go to Location" />
+        android:contentDescription="Go to Location"/>
 
 </LinearLayout>

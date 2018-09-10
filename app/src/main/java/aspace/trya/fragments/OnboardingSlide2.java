@@ -7,13 +7,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import aspace.trya.R;
 
 public class OnboardingSlide2 extends Fragment {
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup parent,
+        Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_onboarding_slide_2, parent, false);
     }
 

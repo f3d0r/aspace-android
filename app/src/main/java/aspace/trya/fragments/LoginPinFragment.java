@@ -10,25 +10,25 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.alimuzaffar.lib.pin.PinEntryEditText;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-
 import aspace.trya.R;
+import aspace.trya.api.AspaceMainService;
 import aspace.trya.api.AspaceResponseCodes;
-import aspace.trya.api.AspaceService;
-import aspace.trya.api.AspaceServiceGenerator;
-import aspace.trya.misc.OnApplicationStateListener;
+import aspace.trya.api.RetrofitServiceGenerator;
+import aspace.trya.listeners.OnApplicationStateListener;
+import aspace.trya.misc.APIURLs;
 import aspace.trya.models.AuthResponse;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.alimuzaffar.lib.pin.PinEntryEditText;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 
 public class LoginPinFragment extends Fragment {
+
     @BindView(R.id.buttonBack)
     Button backButton;
     @BindView(R.id.buttonContinue)
@@ -43,7 +43,7 @@ public class LoginPinFragment extends Fragment {
 
     private OnApplicationStateListener mListener;
 
-    private AspaceService aspaceService;
+    private AspaceMainService aspaceMainService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -55,7 +55,8 @@ public class LoginPinFragment extends Fragment {
 
         continueButton.setEnabled(true);
 
-        aspaceService = AspaceServiceGenerator.createService(AspaceService.class);
+        aspaceMainService = RetrofitServiceGenerator
+            .createService(AspaceMainService.class, APIURLs.ASPACE_MAIN_PROD_URL);
 
         pinEntryEditText.requestFocus();
 
@@ -69,7 +70,7 @@ public class LoginPinFragment extends Fragment {
             mListener = (OnApplicationStateListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -88,16 +89,19 @@ public class LoginPinFragment extends Fragment {
             if (pinEntryEditText.getText().toString().length() != 6) {
                 pinEntryEditText.setError("Incomplete PIN");
             } else {
-                Call<AuthResponse> call = aspaceService.checkPin(loginPhoneNumber, deviceId, pinEntryEditText.getText().toString());
+                Call<AuthResponse> call = aspaceMainService
+                    .checkPin(loginPhoneNumber, deviceId, pinEntryEditText.getText().toString());
                 call.enqueue(new Callback<AuthResponse>() {
                     @Override
-                    public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                    public void onResponse(Call<AuthResponse> call,
+                        Response<AuthResponse> response) {
                         int responseCode = response.body().getResponseCode();
                         if (responseCode == AspaceResponseCodes.PIN_EXPIRED) {
                             mListener.pinExpired();
                         } else if (responseCode == AspaceResponseCodes.INVALID_PIN) {
                             pinEntryEditText.setError("Invalid PIN");
-                            YoYo.with(Techniques.Shake).duration(500).playOn(view.findViewById(R.id.txt_pin_entry));
+                            YoYo.with(Techniques.Shake).duration(500)
+                                .playOn(view.findViewById(R.id.txt_pin_entry));
                             pinEntryEditText.requestFocus();
                         } else {
                             mListener.continueFromLogin(response.body().getAccessCode());
@@ -106,7 +110,9 @@ public class LoginPinFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
-                        Toast.makeText(getContext(), "Something went wrong, please restart the app.", Toast.LENGTH_SHORT).show();
+                        Toast
+                            .makeText(getContext(), "Something went wrong, please restart the app.",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }

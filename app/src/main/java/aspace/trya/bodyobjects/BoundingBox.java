@@ -25,9 +25,9 @@ public class BoundingBox {
     @Override
     public String toString() {
         return
-                "BoundingBox{" +
-                        "sw = '" + sw + '\'' +
-                        ",ne = '" + ne + '\'' +
-                        "}";
+            "BoundingBox{" +
+                "sw = '" + sw + '\'' +
+                ",ne = '" + ne + '\'' +
+                "}";
     }
 }

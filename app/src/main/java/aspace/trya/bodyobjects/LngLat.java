@@ -30,10 +30,10 @@ public class LngLat {
     @Override
     public String toString() {
         return
-                "Ne{" +
-                        "lng = '" + lng + '\'' +
-                        ",lat = '" + lat + '\'' +
-                        "}";
+            "Ne{" +
+                "lng = '" + lng + '\'' +
+                ",lat = '" + lat + '\'' +
+                "}";
     }
 
 }

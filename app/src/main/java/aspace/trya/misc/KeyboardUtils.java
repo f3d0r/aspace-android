@@ -4,6 +4,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 public class KeyboardUtils {
+
     /**
      * Hides the soft keyboard
      */

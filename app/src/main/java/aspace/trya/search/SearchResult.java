@@ -3,11 +3,11 @@ package aspace.trya.search;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
-
 import aspace.trya.R;
 import aspace.trya.models.geojson.Feature;
 
 public class SearchResult {
+
     private Feature feature;
     private Drawable locationType;
     private String mainAddress;

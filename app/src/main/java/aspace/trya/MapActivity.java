@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -26,13 +27,32 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import aspace.trya.adapters.ArrayRecyclerAdapter;
+import aspace.trya.api.AspaceRoutingService;
+import aspace.trya.api.MapboxService;
+import aspace.trya.api.RetrofitLatLng;
+import aspace.trya.api.RetrofitServiceGenerator;
+import aspace.trya.controllers.RouteOptionsMapController;
+import aspace.trya.controllers.RoutePreviewBottomSheetController;
+import aspace.trya.fragments.RouteOptionsPreviewFragment;
+import aspace.trya.listeners.RouteOptionsListener;
+import aspace.trya.listeners.RoutePreviewSwipeListener;
+import aspace.trya.misc.APIURLs;
+import aspace.trya.misc.ApplicationState;
+import aspace.trya.misc.KeyboardUtils;
+import aspace.trya.misc.LocationMonitoringService;
+import aspace.trya.misc.MapUtils;
+import aspace.trya.models.RouteOptionsResponse;
+import aspace.trya.models.geojson.Feature;
+import aspace.trya.models.geojson.GeoJSON;
+import aspace.trya.search.SearchResult;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -41,42 +61,22 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mypopsy.widget.FloatingSearchView;
 import com.steelkiwi.library.SlidingSquareLoaderView;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import aspace.trya.api.AspaceService;
-import aspace.trya.api.AspaceServiceGenerator;
-import aspace.trya.api.MapboxService;
-import aspace.trya.api.MapboxServiceGenerator;
-import aspace.trya.api.RetrofitLatLng;
-import aspace.trya.fragments.RouteOptionsPreviewFragment;
-import aspace.trya.misc.ApplicationState;
-import aspace.trya.misc.KeyboardUtils;
-import aspace.trya.misc.LocationMonitoringService;
-import aspace.trya.misc.MapUtils;
-import aspace.trya.misc.RouteOptionsListener;
-import aspace.trya.models.DirectionsResponse;
-import aspace.trya.models.RouteOptionsResponse;
-import aspace.trya.models.geojson.Feature;
-import aspace.trya.models.geojson.GeoJSON;
-import aspace.trya.models.routing_options.RouteSegment;
-import aspace.trya.search.ArrayRecyclerAdapter;
-import aspace.trya.search.SearchResult;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import java.util.Timer;
+import java.util.TimerTask;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
-public class MapActivity extends AppCompatActivity implements RouteOptionsListener, OnMapReadyCallback, View.OnClickListener, ActionMenuView.OnMenuItemClickListener {
+public class MapActivity extends AppCompatActivity implements RouteOptionsListener,
+    RoutePreviewSwipeListener, OnMapReadyCallback, View.OnClickListener,
+    ActionMenuView.OnMenuItemClickListener {
+
     @BindView(R.id.map_view)
     MapView mapView;
     @BindView(R.id.floating_search_view)
@@ -89,6 +89,11 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     @BindView(R.id.zoom_in_warning_cardview)
     CardView cvZoomInWarning;
+
+    @BindView(R.id.route_summary_fragment)
+    LinearLayout fragmentRouteSummary;
+    @BindView(R.id.start_navigation_button)
+    FloatingActionButton btStartNavigation;
 
     private MapboxMap mapboxMap;
 
@@ -106,6 +111,13 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     //For Route Display (Defaults)
     private Feature routeOrigin;
+
+    //Route Options Fragment Controller for Map
+    private RouteOptionsMapController routeOptionsMapController;
+
+    private boolean cvZoomInWarningVisible;
+
+    private BottomSheetBehavior fgRouteSummaryBehavior;
 
     @Override
     public void onBackPressed() {
@@ -127,29 +139,36 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         applicationState = new ApplicationState(MapActivity.this);
         beginLocation = applicationState.getLoadLocation();
+        fgRouteSummaryBehavior = BottomSheetBehavior.from(fragmentRouteSummary);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String latitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
-                        String longitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
-                        if (latitude != null && longitude != null) {
-                            lastCurrentLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                            routeOrigin = new Feature(beginLocation, true);
-                            if (locationTracked && mapboxMap != null) {
-                                mapUtils.zoomToLatLng(lastCurrentLocation, 250);
-                            }
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String latitude = intent
+                        .getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
+                    String longitude = intent
+                        .getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
+                    if (latitude != null && longitude != null) {
+                        lastCurrentLocation = new LatLng(Double.parseDouble(latitude),
+                            Double.parseDouble(longitude));
+                        routeOrigin = new Feature(beginLocation, true);
+                        if (locationTracked && mapboxMap != null) {
+                            mapUtils.zoomToLatLng(lastCurrentLocation, 250);
                         }
                     }
-                }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
+                }
+            }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
         );
 
         ButterKnife.bind(this);
 
         floatingSearchView.setOnSearchFocusChangedListener(focused -> {
-            floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
-            cvZoomInWarning.setAlpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0);
+            floatingSearchView.getMenu().getItem(0)
+                .setVisible(floatingSearchView.getText().toString().trim().length() != 0);
+            if (cvZoomInWarningVisible) {
+                cvZoomInWarning.setAlpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0);
+            }
             btCurrentLocation.setVisibility(focused ? View.INVISIBLE : View.VISIBLE);
         });
 
@@ -163,7 +182,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         floatingSearchView.setOnSearchListener(text -> floatingSearchView.setActivated(false));
 
         floatingSearchView.addTextChangedListener(new TextWatcher() {
-            private final long DELAY = 500; // milliseconds
+            private final long DELAY = getResources()
+                .getInteger(R.integer.search_gecode_delay_milli); // milliseconds
             private Timer timer = new Timer();
 
             @Override
@@ -179,50 +199,60 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 timer.cancel();
                 timer = new Timer();
                 timer.schedule(
-                        new TimerTask() {
-                            @Override
-                            public void run() {
-                                runOnUiThread(() -> {
-                                    floatingSearchView.getMenu().getItem(0).setVisible(floatingSearchView.getText().toString().trim().length() != 0);
-                                    if (floatingSearchView.getText().length() == 0) {
-                                        mAdapter.clear();
-
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            runOnUiThread(() -> {
+                                if (floatingSearchView.getText().toString().trim().length() == 0) {
+                                    mAdapter.clear();
+                                    floatingSearchView.getMenu().getItem(0).setVisible(false);
+                                } else {
+                                    floatingSearchView.getMenu().getItem(0).setVisible(true);
+                                }
+                                String searchString =
+                                    s.toString().replace(' ', '+').trim() + ".json";
+                                Call<GeoJSON> call = RetrofitServiceGenerator
+                                    .createService(MapboxService.class,
+                                        APIURLs.MAPBOX_URL)
+                                    .getSearchSuggestions(searchString,
+                                        new RetrofitLatLng(
+                                            mapboxMap.getCameraPosition().target.getLatitude(),
+                                            mapboxMap.getCameraPosition().target.getLongitude()),
+                                        "us",
+                                        getString(R.string.mapbox_access_token), 10);
+                                call.enqueue(new Callback<GeoJSON>() {
+                                    @Override
+                                    public void onResponse(@NonNull Call<GeoJSON> call,
+                                        @NonNull Response<GeoJSON> response) {
+                                        try {
+                                            assert response.body() != null;
+                                            mAdapter.setNotifyOnChange(false);
+                                            mAdapter.clear();
+                                            mAdapter.addAll(response.body()
+                                                .getSearchResults(getApplicationContext()));
+                                            mAdapter.setNotifyOnChange(true);
+                                            mAdapter.notifyDataSetChanged();
+                                        } catch (NullPointerException ignored) {
+                                        }
                                     }
-                                    String searchString = s.toString().replace(' ', '+').trim() + ".json";
-                                    Call<GeoJSON> call = MapboxServiceGenerator.createService(MapboxService.class).getSearchSuggestions(searchString, new RetrofitLatLng(mapboxMap.getCameraPosition().target.getLatitude(), mapboxMap.getCameraPosition().target.getLongitude()), "us", getString(R.string.mapbox_access_token), 10);
-                                    call.enqueue(new Callback<GeoJSON>() {
-                                        @Override
-                                        public void onResponse(@NonNull Call<GeoJSON> call, @NonNull Response<GeoJSON> response) {
-                                            try {
-                                                assert response.body() != null;
-                                                mAdapter.setNotifyOnChange(false);
-                                                mAdapter.clear();
-                                                mAdapter.addAll(response.body().getSearchResults(getApplicationContext()));
-                                                mAdapter.setNotifyOnChange(true);
-                                                mAdapter.notifyDataSetChanged();
-                                            } catch (NullPointerException ignored) {
-                                            }
-                                        }
 
-                                        @Override
-                                        public void onFailure(@NonNull Call<GeoJSON> call, Throwable t) {
-                                        }
-                                    });
+                                    @Override
+                                    public void onFailure(@NonNull Call<GeoJSON> call,
+                                        Throwable t) {
+                                        Timber.w("ERROR: ");
+                                        Timber.w(t);
+                                    }
                                 });
-                            }
-                        },
-                        DELAY
+                            });
+                        }
+                    },
+                    DELAY
                 );
             }
         });
-
         floatingSearchView.setOnMenuItemClickListener(this);
-    }
 
-    public void getAndPopulateMarkers() {
-        mapboxMap.addMarker(new MarkerOptions()
-                .icon(IconFactory.getInstance(this).fromResource(R.drawable.parking_icon_red))
-                .position(new LatLng(beginLocation)));
+        btStartNavigation.setOnClickListener(v -> Timber.w("START NAVIGATION HERE!"));
     }
 
     @Override
@@ -230,14 +260,16 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         this.mapboxMap = mapboxMap;
         mapUtils = new MapUtils(mapboxMap, this);
         CameraPosition position = new CameraPosition.Builder()
-                .target(beginLocation)
-                .zoom(14)
-                .build();
+            .target(beginLocation)
+            .zoom(14)
+            .build();
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
         mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
         btCurrentLocation.setOnClickListener(v -> {
             locationTracked = !locationTracked;
-            btCurrentLocation.setImageResource(locationTracked ? R.drawable.ic_current_location_enabled : R.drawable.ic_current_location_disabled);
+            btCurrentLocation
+                .setImageResource(locationTracked ? R.drawable.ic_current_location_enabled
+                    : R.drawable.ic_current_location_disabled);
             if (locationTracked) {
                 mapUtils.zoomToLatLng(lastCurrentLocation, 250);
             }
@@ -272,7 +304,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 boolean warningVisible = mapboxMap.getCameraPosition().zoom < 15;
                 if (beginStatus != warningVisible) {
                     beginStatus = warningVisible;
-                    cvZoomInWarning.animate().setDuration(200).alpha(warningVisible ? 1 : 0).start();
+                    cvZoomInWarning.animate().setDuration(200).alpha(warningVisible ? 1 : 0)
+                        .start();
                 }
             }
 
@@ -282,8 +315,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         });
 
         mapboxMap.addOnMapClickListener(point -> btCurrentLocation.setVisibility(View.VISIBLE));
-
-//        getAndPopulateMarkers();
     }
 
     @Override
@@ -316,27 +347,32 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 return false;
         }
 
-//        LineLayer lineLayer = new LineLayer().
     }
 
     public void toggleSearchViewVisible(boolean visible, aspace.trya.misc.Callback callback) {
         floatingSearchView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         floatingSearchView.animate()
-                .translationYBy(visible ? 200.0f : -200.0f)
-                .setDuration(150)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (callback != null) {
-                            callback.execute();
-                        }
+            .translationYBy(visible ? 200.0f : -200.0f)
+            .setDuration(150)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (callback != null) {
+                        callback.execute();
                     }
-                });
+                }
+            });
+    }
+
+    public void toggleRouteSummarySheetVisible(boolean visible,
+        aspace.trya.misc.Callback callback) {
+        fgRouteSummaryBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     @Override
     public void routeOptionsOriginSelectorClicked(CardView cvRouteOptions) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
+        Fragment fragment = getSupportFragmentManager()
+            .findFragmentById(R.id.top_summary_view_fragment);
         if (fragment != null) {
             Animation animation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top);
             animation.setAnimationListener(new Animation.AnimationListener() {
@@ -349,7 +385,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     ft.remove(fragment);
                     ft.commitAllowingStateLoss();
-                    floatingSearchView.setHint("Origin?");
+                    floatingSearchView.setHint("RouteLatLng?");
                     toggleSearchViewVisible(true, () -> {
                         floatingSearchView.requestFocus();
                         floatingSearchView.setActivated(true);
@@ -367,7 +403,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
     @Override
     public void routeOptionsDestinationSelectorClicked(CardView cvRouteOptions) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.top_summary_view_fragment);
+        Fragment fragment = getSupportFragmentManager()
+            .findFragmentById(R.id.top_summary_view_fragment);
         if (fragment != null) {
             Animation animation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top);
             animation.setAnimationListener(new Animation.AnimationListener() {
@@ -393,40 +430,63 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             });
             cvRouteOptions.startAnimation(animation);
         }
-
     }
 
-    @Override
-    public void routeOptionsParkBikeSelectorClicked(RouteOptionsResponse routeOptionsResponse, int optionSelected) {
-        mapUtils.zoomToBbox(routeOptionsResponse.getLatLngBounds(optionSelected), 2000, true);
-        mapUtils.drawRoutes(routeOptionsResponse, optionSelected);
-        List<DirectionsResponse> directions = new ArrayList<>();
-        for (RouteSegment currentSegment : routeOptionsResponse.getRouteOptions().get(optionSelected)) {
-            directions.add(currentSegment.getDirections().get(0));
+    public void toggleZoomInWarning(boolean visible) {
+        cvZoomInWarningVisible = visible;
+        if (visible) {
+            cvZoomInWarning.animate().setDuration(200)
+                .alpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0).start();
+        } else {
+            cvZoomInWarning.animate().setDuration(200).alpha(0).start();
         }
     }
 
     @Override
-    public void routeOptionsParkWalkSelectorClicked(RouteOptionsResponse routeOptionsResponse, int optionSelected) {
-        mapUtils.drawRoutes(routeOptionsResponse, optionSelected);
-        mapUtils.zoomToBbox(routeOptionsResponse.getLatLngBounds(optionSelected), 2000, true);
-        List<DirectionsResponse> directions = new ArrayList<>();
-        for (RouteSegment currentSegment : routeOptionsResponse.getRouteOptions().get(optionSelected)) {
-            directions.add(currentSegment.getDirections().get(0));
-        }
+    public void routeOptionsParkBikeSelectorClicked(RouteOptionsResponse routeOptionsResponse,
+        int optionSelected) {
+//        List<DirectionsResponse> directions = new ArrayList<>();
+//        for (RouteSegment currentSegment : routeOptionsResponse.getRouteOptions()
+//            .get(optionSelected)) {
+//            directions.add(currentSegment.getDirections().get(0));
+//        }
+        routeOptionsMapController.parkBikeOptionPressed();
     }
 
     @Override
-    public void routeOptionsParkDirectSelectorClicked(RouteOptionsResponse routeOptionsResponse, int optionSelected) {
-        mapUtils.zoomToBbox(routeOptionsResponse.getLatLngBounds(optionSelected), 2000, true);
-        List<DirectionsResponse> directions = new ArrayList<>();
-        for (RouteSegment currentSegment : routeOptionsResponse.getRouteOptions().get(optionSelected)) {
-            directions.add(currentSegment.getDirections().get(0));
-        }
-        mapUtils.drawRoutes(routeOptionsResponse, optionSelected);
+    public void routeOptionsParkWalkSelectorClicked(RouteOptionsResponse routeOptionsResponse,
+        int optionSelected) {
+//        List<DirectionsResponse> directions = new ArrayList<>();
+//        for (RouteSegment currentSegment : routeOptionsResponse.getRouteOptions()
+//            .get(optionSelected)) {
+//            directions.add(currentSegment.getDirections().get(0));
+//        }
+        routeOptionsMapController.parkWalkOptionPressed();
+    }
+
+    @Override
+    public void routeOptionsParkDirectSelectorClicked(RouteOptionsResponse routeOptionsResponse,
+        int optionSelected) {
+//        List<DirectionsResponse> directions = new ArrayList<>();
+//        for (RouteSegment currentSegment : routeOptionsResponse.getRouteOptions()
+//            .get(optionSelected)) {
+//            directions.add(currentSegment.getDirections().get(0));
+//        }
+        routeOptionsMapController.parkDirectionOptionPressed();
+    }
+
+    @Override
+    public void routeSegmentSwipe(int toSegmentIndex) {
+//        routeOptionsMapController
+    }
+
+    @Override
+    public void startRouteButtonPressed() {
+
     }
 
     private class SearchAdapter extends ArrayRecyclerAdapter<SearchResult, SuggestionViewHolder> {
+
         private LayoutInflater inflater;
 
         SearchAdapter() {
@@ -435,8 +495,11 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         @Override
         public MapActivity.SuggestionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            if (inflater == null) inflater = LayoutInflater.from(parent.getContext());
-            return new MapActivity.SuggestionViewHolder(inflater.inflate(R.layout.item_suggestion, parent, false));
+            if (inflater == null) {
+                inflater = LayoutInflater.from(parent.getContext());
+            }
+            return new MapActivity.SuggestionViewHolder(
+                inflater.inflate(R.layout.item_suggestion, parent, false));
         }
 
         @Override
@@ -451,6 +514,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     }
 
     private class SuggestionViewHolder extends RecyclerView.ViewHolder {
+
         ImageView locationType, goButton;
         TextView mainAddress, cityState;
 
@@ -462,9 +526,11 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             cityState = itemView.findViewById(R.id.city_state_tv);
             itemView.findViewById(R.id.address_layout).setOnClickListener((View v) -> {
                 loadingSquareView.show();
+                toggleZoomInWarning(false);
 
                 Feature clickedFeature = mAdapter.getItem(getAdapterPosition()).getFeature();
-                KeyboardUtils.hideSoftKeyboard(getCurrentFocus(), getSystemService(INPUT_METHOD_SERVICE));
+                KeyboardUtils
+                    .hideSoftKeyboard(getCurrentFocus(), getSystemService(INPUT_METHOD_SERVICE));
 
                 btCurrentLocation.setImageResource(R.drawable.ic_current_location_disabled);
                 btCurrentLocation.setVisibility(View.GONE);
@@ -476,38 +542,70 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
                     mAdapter.clear();
                     floatingSearchView.setVisibility(View.INVISIBLE);
+                    btCurrentLocation.setVisibility(View.INVISIBLE);
 
-                    AspaceService aspaceService = AspaceServiceGenerator.createService(AspaceService.class);
-                    Observable<RouteOptionsResponse> driveBikeRouteOptions = aspaceService.getDriveBikeRoute(47.7930, -122.3584, 47.6057, -122.3336);
-                    Observable<RouteOptionsResponse> driveWalkRouteOptions = aspaceService.getDriveWalkWaypoints(47.7930, -122.3584, 47.6057, -122.3336);
-                    Observable<RouteOptionsResponse> driveDirectRouteOptions = aspaceService.getDriveDirectRoute(47.7930, -122.3584, 47.6057, -122.3336);
-                    Observable.zip(driveWalkRouteOptions, driveBikeRouteOptions, driveDirectRouteOptions, (routeOptionsResponse, routeOptionsResponse2, routeOptionsResponse3) -> new RouteOptionsResponse[]{routeOptionsResponse, routeOptionsResponse2, routeOptionsResponse3}).subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Observer<RouteOptionsResponse[]>() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
-                                }
+                    AspaceRoutingService aspaceRoutingService = RetrofitServiceGenerator
+                        .createService(AspaceRoutingService.class, APIURLs.ASPACE_ROUTING_PROD_URL);
+                    Observable<RouteOptionsResponse> driveBikeRouteOptions = aspaceRoutingService
+                        .getDriveBikeRoute(lastCurrentLocation.getLatitude(),
+                            lastCurrentLocation.getLongitude(), clickedFeature.getLatitude(),
+                            clickedFeature.getLongitude());
+                    Observable<RouteOptionsResponse> driveWalkRouteOptions = aspaceRoutingService
+                        .getDriveWalkWaypoints(lastCurrentLocation.getLatitude(),
+                            lastCurrentLocation.getLongitude(), clickedFeature.getLatitude(),
+                            clickedFeature.getLongitude());
+                    Observable<RouteOptionsResponse> driveDirectRouteOptions = aspaceRoutingService
+                        .getDriveDirectRoute(lastCurrentLocation.getLatitude(),
+                            lastCurrentLocation.getLongitude(), clickedFeature.getLatitude(),
+                            clickedFeature.getLongitude());
+                    Observable
+                        .zip(driveBikeRouteOptions, driveWalkRouteOptions, driveDirectRouteOptions,
+                            (routeOptionsResponse, routeOptionsResponse2, routeOptionsResponse3) -> new RouteOptionsResponse[]{
+                                routeOptionsResponse, routeOptionsResponse2, routeOptionsResponse3})
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<RouteOptionsResponse[]>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                            }
 
-                                @Override
-                                public void onNext(RouteOptionsResponse[] routeOptionsResponses) {
-                                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                                    ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                                    RouteOptionsPreviewFragment fragment = RouteOptionsPreviewFragment.newInstance(routeOrigin, clickedFeature, routeOptionsResponses, 0);
+                            @Override
+                            public void onNext(RouteOptionsResponse[] routeOptionsResponses) {
+                                FragmentTransaction ft = getSupportFragmentManager()
+                                    .beginTransaction();
+                                ft.setCustomAnimations(android.R.anim.fade_in,
+                                    android.R.anim.fade_out);
+                                RoutePreviewBottomSheetController routePreviewBottomSheetController = new RoutePreviewBottomSheetController(
+                                    fgRouteSummaryBehavior);
+                                RouteOptionsPreviewFragment fragment = RouteOptionsPreviewFragment
+                                    .newInstance(routeOrigin, clickedFeature, routeOptionsResponses,
+                                        0);
 
-                                    mapUtils.zoomToBbox(routeOptionsResponses[0].getLatLngBounds(0), 3000, true);
-                                    ft.replace(R.id.top_summary_view_fragment, fragment);
-                                    ft.commit();
-                                    loadingSquareView.hide();
-                                }
+                                mapUtils
+                                    .zoomToBbox(routeOptionsResponses[0].getLatLngBounds(0), 3000,
+                                        true);
+                                routeOptionsMapController = new RouteOptionsMapController(
+                                    routeOptionsResponses,
+                                    mapUtils);
+                                ft.replace(R.id.top_summary_view_fragment, fragment);
+                                ft.commit();
+                                loadingSquareView.hide();
+                            }
 
-                                @Override
-                                public void onError(Throwable e) {
-                                }
+                            @Override
+                            public void onError(Throwable e) {
+                                Timber.w("ERROR");
+                                Timber.w(e);
+                            }
 
-                                @Override
-                                public void onComplete() {
-                                }
-                            });
+                            @Override
+                            public void onComplete() {
+                            }
+                        });
+                });
+//        RouteO
+                toggleRouteSummarySheetVisible(true, () -> {
+
                 });
             });
         }
@@ -519,4 +617,5 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             cityState.setText(result.getCityState());
         }
     }
+
 }

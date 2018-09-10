@@ -4,20 +4,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-
-import java.util.HashMap;
-
 import aspace.trya.fragments.LoginPhoneFragment;
 import aspace.trya.fragments.LoginPinFragment;
+import aspace.trya.listeners.OnApplicationStateListener;
 import aspace.trya.misc.ApplicationState;
-import aspace.trya.misc.OnApplicationStateListener;
 import aspace.trya.models.AccessCode;
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity implements OnApplicationStateListener {
 
-    private HashMap<String, String> applicationState;
-
     ApplicationState applicationStateModifier;
+    private HashMap<String, String> applicationState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +61,8 @@ public class LoginActivity extends AppCompatActivity implements OnApplicationSta
 
     @Override
     public void continueFromLogin(AccessCode accessCode) {
-        applicationStateModifier.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode, applicationState.get("DEVICE_ID"));
+        applicationStateModifier.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode,
+            applicationState.get("DEVICE_ID"));
         if (applicationState.get("ONBOARD").equals("true")) {
             startActivity(new Intent(LoginActivity.this, OnboardingActivity.class));
         } else {

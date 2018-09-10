@@ -11,22 +11,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.hbb20.CountryCodePicker;
-
-import java.util.UUID;
-
 import aspace.trya.R;
+import aspace.trya.api.AspaceMainService;
 import aspace.trya.api.AspaceResponseCodes;
-import aspace.trya.api.AspaceService;
-import aspace.trya.api.AspaceServiceGenerator;
-import aspace.trya.misc.OnApplicationStateListener;
+import aspace.trya.api.RetrofitServiceGenerator;
+import aspace.trya.listeners.OnApplicationStateListener;
+import aspace.trya.misc.APIURLs;
 import aspace.trya.models.AuthResponse;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.hbb20.CountryCodePicker;
 import io.michaelrocks.libphonenumber.android.NumberParseException;
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import io.michaelrocks.libphonenumber.android.Phonenumber;
+import java.util.UUID;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,7 +59,7 @@ public class LoginPhoneFragment extends Fragment {
             mListener = (OnApplicationStateListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -93,18 +91,27 @@ public class LoginPhoneFragment extends Fragment {
             } else {
                 final String deviceId = UUID.randomUUID().toString();
 
-                Call<AuthResponse> call = AspaceServiceGenerator.createService(AspaceService.class).phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
+                Call<AuthResponse> call = RetrofitServiceGenerator
+                    .createService(AspaceMainService.class,
+                        APIURLs.ASPACE_MAIN_PROD_URL)
+                    .phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
                 call.enqueue(new Callback<AuthResponse>() {
                     @Override
-                    public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                    public void onResponse(Call<AuthResponse> call,
+                        Response<AuthResponse> response) {
                         int responseCode = response.body().getResponseCode();
                         if (responseCode == AspaceResponseCodes.INVALID_PHONE) {
                             phoneNumberEditText.setError("Invalid phone #");
                             phoneNumberEditText.requestFocus();
-                        } else if (responseCode == AspaceResponseCodes.NEW_PHONE || responseCode == AspaceResponseCodes.RETURNING_PHONE) {
-                            mListener.phoneLoginToConfirm(phoneNumberEditText.getText().toString(), deviceId, response.body().getResponseCode() == AspaceResponseCodes.NEW_PHONE);
+                        } else if (responseCode == AspaceResponseCodes.NEW_PHONE
+                            || responseCode == AspaceResponseCodes.RETURNING_PHONE) {
+                            mListener.phoneLoginToConfirm(phoneNumberEditText.getText().toString(),
+                                deviceId,
+                                response.body().getResponseCode() == AspaceResponseCodes.NEW_PHONE);
                         } else {
-                            Toast.makeText(getContext(), "Something went wrong, please restart the app.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(),
+                                "Something went wrong, please restart the app.",
+                                Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -117,6 +124,7 @@ public class LoginPhoneFragment extends Fragment {
     }
 
     private class PhoneNumberFormattingTextWatcher implements TextWatcher {
+
         private boolean backspacingFlag = false;
         private boolean editedFlag = false;
         private int cursorComplement;
@@ -138,14 +146,18 @@ public class LoginPhoneFragment extends Fragment {
             if (!editedFlag) {
                 if (phone.length() >= 6 && !backspacingFlag) {
                     editedFlag = true;
-                    String ans = "(" + phone.substring(0, 3) + ") " + phone.substring(3, 6) + "-" + phone.substring(6);
+                    String ans =
+                        "(" + phone.substring(0, 3) + ") " + phone.substring(3, 6) + "-" + phone
+                            .substring(6);
                     phoneNumberEditText.setText(ans);
-                    phoneNumberEditText.setSelection(phoneNumberEditText.getText().length() - cursorComplement);
+                    phoneNumberEditText
+                        .setSelection(phoneNumberEditText.getText().length() - cursorComplement);
                 } else if (phone.length() >= 3 && !backspacingFlag) {
                     editedFlag = true;
                     String ans = "(" + phone.substring(0, 3) + ") " + phone.substring(3);
                     phoneNumberEditText.setText(ans);
-                    phoneNumberEditText.setSelection(phoneNumberEditText.getText().length() - cursorComplement);
+                    phoneNumberEditText
+                        .setSelection(phoneNumberEditText.getText().length() - cursorComplement);
                 }
             } else {
                 editedFlag = false;

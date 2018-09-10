@@ -1,11 +1,9 @@
-package aspace.trya.models.directions;
+package aspace.trya.models.osrm_directions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
 import java.util.List;
 
-public class RouteLeg implements Serializable {
+public class Leg {
 
     @JsonProperty("annotation")
     private Annotation annotation;
@@ -17,13 +15,13 @@ public class RouteLeg implements Serializable {
     private double duration;
 
     @JsonProperty("distance")
-    private double distance;
+    private int distance;
 
     @JsonProperty("weight")
     private double weight;
 
     @JsonProperty("steps")
-    private List<RouteStep> steps;
+    private List<Step> steps;
 
     public void setAnnotation(Annotation annotation) {
         this.annotation = annotation;
@@ -49,12 +47,12 @@ public class RouteLeg implements Serializable {
         return duration;
     }
 
-    public void setDistance(double distance) {
-        this.distance = distance;
+    public int getDistance() {
+        return distance;
     }
 
-    public double getDistance() {
-        return distance;
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 
     public void setWeight(double weight) {
@@ -65,24 +63,24 @@ public class RouteLeg implements Serializable {
         return weight;
     }
 
-    public List<RouteStep> getSteps() {
+    public List<Step> getSteps() {
         return steps;
     }
 
-    public void setSteps(List<RouteStep> steps) {
+    public void setSteps(List<Step> steps) {
         this.steps = steps;
     }
 
     @Override
     public String toString() {
         return
-                "RouteLeg{" +
-                        "annotation = '" + annotation + '\'' +
-                        ",summary = '" + summary + '\'' +
-                        ",duration = '" + duration + '\'' +
-                        ",distance = '" + distance + '\'' +
-                        ",weight = '" + weight + '\'' +
-                        ",steps = '" + steps + '\'' +
-                        "}";
+            "Leg{" +
+                "annotation = '" + annotation + '\'' +
+                ",summary = '" + summary + '\'' +
+                ",duration = '" + duration + '\'' +
+                ",distance = '" + distance + '\'' +
+                ",weight = '" + weight + '\'' +
+                ",steps = '" + steps + '\'' +
+                "}";
     }
 }

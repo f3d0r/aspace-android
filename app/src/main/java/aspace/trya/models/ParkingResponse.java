@@ -1,7 +1,6 @@
 package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public class ParkingResponse {
@@ -31,8 +30,8 @@ public class ParkingResponse {
     @Override
     public String toString() {
         return "ParkingResponse{" +
-                "responseInfo=" + responseInfo +
-                ", parkingSpots=" + parkingSpots +
-                '}';
+            "responseInfo=" + responseInfo +
+            ", parkingSpots=" + parkingSpots +
+            '}';
     }
 }

@@ -1,7 +1,6 @@
-package aspace.trya.search;
+package aspace.trya.adapters;
 
 import android.support.v7.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,21 +9,21 @@ import java.util.Comparator;
 import java.util.List;
 
 public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder>
-        extends RecyclerView.Adapter<VH> {
+    extends RecyclerView.Adapter<VH> {
 
     /**
-     * Lock used to modify the content of {@link #mObjects}. Any write operation
-     * performed on the array should be synchronized on this lock.
+     * Lock used to modify the content of {@link #mObjects}. Any write operation performed on the
+     * array should be synchronized on this lock.
      */
     private final Object mLock = new Object();
     /**
-     * Contains the list of objects that represent the data of this ArrayAdapter.
-     * The content of this list is referred to as "the array" in the documentation.
+     * Contains the list of objects that represent the data of this ArrayAdapter. The content of
+     * this list is referred to as "the array" in the documentation.
      */
     private List<T> mObjects;
     /**
-     * Indicates whether or not {@link #notifyDataSetChanged()} must be called whenever
-     * {@link #mObjects} is modified.
+     * Indicates whether or not {@link #notifyDataSetChanged()} must be called whenever {@link
+     * #mObjects} is modified.
      */
     private boolean mNotifyOnChange = true;
 
@@ -51,7 +50,9 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
             pos = getItemCount();
             mObjects.add(object);
         }
-        if (mNotifyOnChange) notifyItemInserted(pos);
+        if (mNotifyOnChange) {
+            notifyItemInserted(pos);
+        }
     }
 
     /**
@@ -65,7 +66,9 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
             pos = getItemCount();
             mObjects.addAll(collection);
         }
-        if (mNotifyOnChange) notifyItemRangeInserted(pos, collection.size());
+        if (mNotifyOnChange) {
+            notifyItemRangeInserted(pos, collection.size());
+        }
     }
 
     /**
@@ -79,20 +82,24 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
             start = getItemCount();
             Collections.addAll(mObjects, items);
         }
-        if (mNotifyOnChange) notifyItemRangeInserted(start, items.length);
+        if (mNotifyOnChange) {
+            notifyItemRangeInserted(start, items.length);
+        }
     }
 
     /**
      * Inserts the specified object at the specified index in the array.
      *
      * @param object The object to insert into the array.
-     * @param index  The index at which the object must be inserted.
+     * @param index The index at which the object must be inserted.
      */
     private void insert(T object, int index) {
         synchronized (mLock) {
             mObjects.add(index, object);
         }
-        if (mNotifyOnChange) notifyItemInserted(index);
+        if (mNotifyOnChange) {
+            notifyItemInserted(index);
+        }
     }
 
     /**
@@ -104,10 +111,14 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
         int pos;
         synchronized (mLock) {
             pos = getPosition(object);
-            if (pos == -1) return;
+            if (pos == -1) {
+                return;
+            }
             mObjects.remove(pos);
         }
-        if (mNotifyOnChange) notifyItemRemoved(pos);
+        if (mNotifyOnChange) {
+            notifyItemRemoved(pos);
+        }
     }
 
     /**
@@ -117,35 +128,33 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
         synchronized (mLock) {
             mObjects.clear();
         }
-        if (mNotifyOnChange) notifyDataSetChanged();
+        if (mNotifyOnChange) {
+            notifyDataSetChanged();
+        }
     }
 
     /**
      * Sorts the content of this adapter using the specified comparator.
      *
-     * @param comparator The comparator used to sort the objects contained
-     *                   in this adapter.
+     * @param comparator The comparator used to sort the objects contained in this adapter.
      */
     public void sort(Comparator<? super T> comparator) {
         synchronized (mLock) {
             Collections.sort(mObjects, comparator);
         }
-        if (mNotifyOnChange) notifyDataSetChanged();
+        if (mNotifyOnChange) {
+            notifyDataSetChanged();
+        }
     }
 
     /**
-     * Control whether methods that change the list ({@link #add},
-     * {@link #insert}, {@link #remove}, {@link #clear}) automatically call
-     * {@link #notifyDataSetChanged}.  If set to false, caller must
-     * manually call notifyDataSetChanged() to have the changes
-     * reflected in the attached view.
-     * <p>
-     * The default is true, and calling notifyDataSetChanged()
-     * resets the flag to true.
+     * Control whether methods that change the list ({@link #add}, {@link #insert}, {@link #remove},
+     * {@link #clear}) automatically call {@link #notifyDataSetChanged}.  If set to false, caller
+     * must manually call notifyDataSetChanged() to have the changes reflected in the attached view.
+     * <p> The default is true, and calling notifyDataSetChanged() resets the flag to true.
      *
-     * @param notifyOnChange if true, modifications to the list will
-     *                       automatically call {@link
-     *                       #notifyDataSetChanged}
+     * @param notifyOnChange if true, modifications to the list will automatically call {@link
+     * #notifyDataSetChanged}
      */
     public void setNotifyOnChange(boolean notifyOnChange) {
         mNotifyOnChange = notifyOnChange;

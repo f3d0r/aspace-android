@@ -18,46 +18,46 @@ public class Context {
     @JsonProperty("short_code")
     private String shortCode;
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setWikidata(String wikidata) {
-        this.wikidata = wikidata;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public String getWikidata() {
         return wikidata;
     }
 
-    public void setShortCode(String shortCode) {
-        this.shortCode = shortCode;
+    public void setWikidata(String wikidata) {
+        this.wikidata = wikidata;
     }
 
     public String getShortCode() {
         return shortCode;
     }
 
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
+
     @Override
     public String toString() {
         return
-                "Context{" +
-                        "id = '" + id + '\'' +
-                        ",text = '" + text + '\'' +
-                        ",wikidata = '" + wikidata + '\'' +
-                        ",short_code = '" + shortCode + '\'' +
-                        "}";
+            "Context{" +
+                "id = '" + id + '\'' +
+                ",text = '" + text + '\'' +
+                ",wikidata = '" + wikidata + '\'' +
+                ",short_code = '" + shortCode + '\'' +
+                "}";
     }
 }

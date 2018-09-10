@@ -9,5 +9,5 @@
         android:endColor="#86E0F8"
         android:shape="oval"
         android:startColor="#86E0F8"
-        android:type="sweep" />
+        android:type="sweep"/>
 </shape>

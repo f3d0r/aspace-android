@@ -18,8 +18,8 @@ public class CodeResponse {
     @Override
     public String toString() {
         return
-                "CodeResponse{" +
-                        "res_info = '" + resInfo + '\'' +
-                        "}";
+            "CodeResponse{" +
+                "res_info = '" + resInfo + '\'' +
+                "}";
     }
 }

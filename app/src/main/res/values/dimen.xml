@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="pinConfirmLetterSpacing" format="float" type="dimen">0.41sp</dimen>
+    <dimen format="float" name="pinConfirmLetterSpacing" type="dimen">0.41sp</dimen>
 </resources>

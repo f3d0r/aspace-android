@@ -10,12 +10,12 @@ public class AuthResponse {
     @JsonProperty("res_content")
     private AccessCode accessCode;
 
-    public void setResponseInfo(ResponseInfo responseInfo) {
-        this.responseInfo = responseInfo;
-    }
-
     public ResponseInfo getResponseInfo() {
         return responseInfo;
+    }
+
+    public void setResponseInfo(ResponseInfo responseInfo) {
+        this.responseInfo = responseInfo;
     }
 
     public AccessCode getAccessCode() {
@@ -33,8 +33,8 @@ public class AuthResponse {
     @Override
     public String toString() {
         return "AuthResponse{" +
-                "responseInfo=" + responseInfo +
-                ", accessCode=" + accessCode +
-                '}';
+            "responseInfo=" + responseInfo +
+            ", accessCode=" + accessCode +
+            '}';
     }
 }

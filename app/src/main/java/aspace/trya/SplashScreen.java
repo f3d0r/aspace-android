@@ -1,25 +1,20 @@
 package aspace.trya;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.view.View;
+import android.util.Log;
 import android.widget.Toast;
 import aspace.trya.api.AspaceMainService;
 import aspace.trya.api.RetrofitServiceGenerator;
@@ -27,8 +22,27 @@ import aspace.trya.misc.APIURLs;
 import aspace.trya.misc.ApplicationState;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.models.CodeResponse;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,37 +52,97 @@ public class SplashScreen extends Activity {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
+    // location last updated time
+    private String mLastUpdateTime;
+
+    // location updates interval - 10sec
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+
+    // fastest updates interval - 5 sec
+    // location updates will be received if another app is requesting the locations
+    // than your app can handle
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
+
+    private static final int REQUEST_CHECK_SETTINGS = 100;
+
     private boolean mAlreadyStartedService = false;
 
     private boolean locationReceived;
 
     private ApplicationState applicationState;
 
+    // bunch of location related apis
+    private FusedLocationProviderClient mFusedLocationClient;
+    private SettingsClient mSettingsClient;
+    private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
+    private LocationCallback mLocationCallback;
+    private Location mCurrentLocation;
+
+    // boolean flag to toggle the ui
+    private Boolean mRequestingLocationUpdates;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         applicationState = new ApplicationState(SplashScreen.this);
 
-        startStep1();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            new BroadcastReceiver() {
+        initLocation();
+
+        Dexter.withActivity(this)
+            .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(new PermissionListener() {
                 @Override
-                public void onReceive(Context context, Intent intent) {
-                    String latitude = intent
-                        .getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
-                    String longitude = intent
-                        .getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
-                    if (latitude != null && longitude != null && !locationReceived) {
-                        locationReceived = true;
-                        checkUserLoggedIn(latitude, longitude);
+                public void onPermissionGranted(PermissionGrantedResponse response) {
+                    mRequestingLocationUpdates = true;
+                    startLocationUpdates();
+                }
+
+                @Override
+                public void onPermissionDenied(PermissionDeniedResponse response) {
+                    if (response.isPermanentlyDenied()) {
+                        // open device settings when the permission is
+                        // denied permanently
+                        openSettings();
                     }
                 }
-            }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
-        );
+
+                @Override
+                public void onPermissionRationaleShouldBeShown(PermissionRequest permission,
+                    PermissionToken token) {
+                    token.continuePermissionRequest();
+                }
+            }).check();
 
         setContentView(R.layout.activity_splash);
 
         loadLibraries();
+    }
+
+    private void initLocation() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mSettingsClient = LocationServices.getSettingsClient(this);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                // location is received
+                mCurrentLocation = locationResult.getLastLocation();
+
+            }
+        };
+
+        mRequestingLocationUpdates = false;
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
     }
 
     public void loadLibraries() {
@@ -115,200 +189,122 @@ public class SplashScreen extends Activity {
         finish();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    private void startLocationUpdates() {
+        mSettingsClient
+            .checkLocationSettings(mLocationSettingsRequest)
+            .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                @SuppressLint("MissingPermission")
+                @Override
+                public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                    Log.i("TAG", "All location settings are satisfied.");
 
-        startStep1();
-    }
+                    Toast.makeText(getApplicationContext(), "Started location updates!",
+                        Toast.LENGTH_SHORT).show();
 
+                    //noinspection MissingPermission
+                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                        mLocationCallback, Looper.myLooper());
+                }
+            })
+            .addOnFailureListener(this, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    int statusCode = ((ApiException) e).getStatusCode();
+                    switch (statusCode) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            Log.i("TAG",
+                                "Location settings are not satisfied. Attempting to upgrade " +
+                                    "location settings ");
+                            try {
+                                // Show the dialog by calling startResolutionForResult(), and check the
+                                // result in onActivityResult().
+                                ResolvableApiException rae = (ResolvableApiException) e;
+                                rae.startResolutionForResult(SplashScreen.this,
+                                    REQUEST_CHECK_SETTINGS);
+                            } catch (IntentSender.SendIntentException sie) {
+                                Log.i("TAG", "PendingIntent unable to execute request.");
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            String errorMessage =
+                                "Location settings are inadequate, and cannot be " +
+                                    "fixed here. Fix in Settings.";
+                            Log.e("TAG", errorMessage);
 
-    /**
-     * Step 1: Check Google Play services
-     */
-    private void startStep1() {
-        //Check whether this user has installed Google play service which is being used by Location updates.
-        if (isGooglePlayServicesAvailable()) {
-            //Passing null to indicate that it is executing for the first time.
-            startStep2(null);
-        } else {
-            Toast.makeText(getApplicationContext(), "NO GOOGLE PLAY SERVICES", Toast.LENGTH_LONG)
-                .show();
-        }
-    }
-
-
-    /**
-     * Step 2: Check & Prompt Internet connection
-     */
-    private Boolean startStep2(DialogInterface dialog) {
-        ConnectivityManager connectivityManager
-            = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-
-        if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
-            promptInternetConnect();
-            return false;
-        }
-        if (dialog != null) {
-            dialog.dismiss();
-        }
-        //Yes there is active internet connection. Next check Location is granted by user or not.
-
-        if (checkPermissions()) { //Yes permissions are granted by the user. Go to the next step.
-            startStep3();
-        } else {  //No user has not granted the permissions yet. Request now.
-            requestPermissions();
-        }
-        return true;
-    }
-
-    /**
-     * Show A Dialog with button to refresh the internet state.
-     */
-    private void promptInternetConnect() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(SplashScreen.this);
-        builder.setTitle("Title: No internet");
-        builder.setMessage("Message: No internet");
-
-        String positiveText = "Refresh";
-        builder.setPositiveButton(positiveText,
-            (dialog, which) -> {
-                //Block the Application Execution until user grants the permissions
-                if (startStep2(dialog)) {
-                    //Now make sure about location permission.
-                    if (checkPermissions()) {
-                        //Step 2: LngLat the Location Monitor Service
-                        //Everything is there to start the service.
-                        startStep3();
-                    } else if (!checkPermissions()) {
-                        requestPermissions();
+                            Toast.makeText(SplashScreen.this, errorMessage, Toast.LENGTH_LONG)
+                                .show();
                     }
                 }
             });
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
-    /**
-     * Step 3: LngLat the Location Monitor Service
-     */
-    private void startStep3() {
-        //And it will be keep running until you close the entire application from task manager.
-        //This method will executed only once.
-        if (!mAlreadyStartedService) {
+    public void stopLocationUpdates() {
+        // Removing location updates
+        mFusedLocationClient
+            .removeLocationUpdates(mLocationCallback)
+            .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Toast.makeText(getApplicationContext(), "Location updates stopped!",
+                        Toast.LENGTH_SHORT).show();
+                }
+            });
+    }
 
-            //LngLat location sharing service to app server.........
-            Intent intent = new Intent(this, LocationMonitoringService.class);
-            startService(intent);
-
-            mAlreadyStartedService = true;
-            //Ends................................................
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            // Check for the integer request code originally supplied to startResolutionForResult().
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        Log.e("TAG", "User agreed to make required location settings changes.");
+                        // Nothing to do. startLocationupdates() gets called in onResume again.
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Log.e("TAG", "User chose not to make required location settings changes.");
+                        mRequestingLocationUpdates = false;
+                        break;
+                }
+                break;
         }
     }
 
-    /**
-     * Return the availability of GooglePlayServices
-     */
-    public boolean isGooglePlayServicesAvailable() {
-        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-        int status = googleApiAvailability.isGooglePlayServicesAvailable(this);
-        if (status != ConnectionResult.SUCCESS) {
-            if (googleApiAvailability.isUserResolvableError(status)) {
-                googleApiAvailability.getErrorDialog(this, status, 2404).show();
-            }
-            return false;
-        }
-        return true;
+    private void openSettings() {
+        Intent intent = new Intent();
+        intent.setAction(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package",
+            BuildConfig.APPLICATION_ID, null);
+        intent.setData(uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Resuming location updates depending on button state and
+        // allowed permissions
+        if (mRequestingLocationUpdates && checkPermissions()) {
+            startLocationUpdates();
+        }
+    }
 
-    /**
-     * Return the current state of the permissions needed.
-     */
     private boolean checkPermissions() {
-        int permissionState1 = ActivityCompat.checkSelfPermission(this,
-            android.Manifest.permission.ACCESS_FINE_LOCATION);
-
-        int permissionState2 = ActivityCompat.checkSelfPermission(this,
-            Manifest.permission.ACCESS_COARSE_LOCATION);
-
-        return permissionState1 == PackageManager.PERMISSION_GRANTED
-            && permissionState2 == PackageManager.PERMISSION_GRANTED;
-
+        int permissionState = ActivityCompat.checkSelfPermission(this,
+            Manifest.permission.ACCESS_FINE_LOCATION);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * LngLat permissions requests.
-     */
-    private void requestPermissions() {
-        boolean shouldProvideRationale =
-            ActivityCompat.shouldShowRequestPermissionRationale(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION);
-        boolean shouldProvideRationale2 =
-            ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION);
-        if (shouldProvideRationale || shouldProvideRationale2) {
-            showSnackbar("Requesting Permission",
-                "OK?", view -> ActivityCompat.requestPermissions(SplashScreen.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQUEST_PERMISSIONS_REQUEST_CODE));
-        } else {
-            ActivityCompat.requestPermissions(SplashScreen.this,
-                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION},
-                REQUEST_PERMISSIONS_REQUEST_CODE);
-        }
-    }
-
-
-    /**
-     * Shows a {@link Snackbar}.
-     *
-     * @param mainTextString The id for the string resource for the Snackbar text.
-     * @param actionString The text of the action item.
-     * @param listener The listener associated with the Snackbar action.
-     */
-    private void showSnackbar(String mainTextString, String actionString,
-        View.OnClickListener listener) {
-        Snackbar.make(
-            findViewById(android.R.id.content),
-            mainTextString,
-            Snackbar.LENGTH_INDEFINITE)
-            .setAction(actionString, listener).show();
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-        @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startStep3();
-            } else {
-                showSnackbar("Permission was denied",
-                    "Settings", view -> {
-                        // Build intent that displays the App settings screen.
-                        Intent intent = new Intent();
-                        intent.setAction(
-                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package",
-                            BuildConfig.APPLICATION_ID, null);
-                        intent.setData(uri);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    });
-            }
-        }
-    }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopService(new Intent(this, LocationMonitoringService.class));
-        mAlreadyStartedService = false;
+    protected void onPause() {
+        super.onPause();
+
+        if (mRequestingLocationUpdates) {
+            // pausing location updates
+            stopLocationUpdates();
+        }
     }
 }

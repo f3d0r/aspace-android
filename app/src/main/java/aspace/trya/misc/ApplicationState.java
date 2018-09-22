@@ -4,7 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import aspace.trya.models.AccessCode;
+import com.instabug.library.Instabug;
+import com.instabug.library.invocation.InstabugInvocationEvent;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import io.intercom.android.sdk.Intercom;
+import io.intercom.android.sdk.identity.Registration;
+import timber.log.Timber;
 
 public final class ApplicationState {
 
@@ -17,11 +22,16 @@ public final class ApplicationState {
     private SharedPreferences prefs;
 
     public ApplicationState(Activity activity) {
+        Timber.d("INITIALIZATION of appstate");
+        new Instabug.Builder(activity.getApplication(), "a19c3dd621014856ad58f1c3a2ab0db1")
+            .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
+            .build();
         prefs = activity.getSharedPreferences(
             "aspace.trya", Context.MODE_PRIVATE);
     }
 
     public void logout() {
+//        Intercom.client().logout();
         prefs.edit().remove(LOGIN_PHONE_NUMBER).apply();
         prefs.edit().remove(DEVICE_ID).apply();
         prefs.edit().remove(ACCESS_CODE).apply();
@@ -29,6 +39,9 @@ public final class ApplicationState {
 
     public void login(String phoneNumber, AccessCode accessCode, String deviceId) {
         logout();
+//        Registration registration = Registration.create().with(phoneNumber);
+//        Timber.d()
+
         prefs.edit().putString(LOGIN_PHONE_NUMBER, phoneNumber).apply();
         prefs.edit().putString(DEVICE_ID, deviceId).apply();
         prefs.edit().putString(ACCESS_CODE, accessCode.getAccessCode()).apply();

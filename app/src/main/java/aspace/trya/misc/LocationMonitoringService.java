@@ -76,12 +76,13 @@ public class LocationMonitoringService extends Service implements
             Timber.d(TAG, "== Error On onConnected() Permission not granted");
             return;
         }
+        LocationServices.getFusedLocationProviderClient(this)
+            .requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
+
         LocationServices.getFusedLocationProviderClient(this).getLastLocation()
             .addOnSuccessListener(
                 location -> sendMessageToUI(location.getLatitude() + "",
                     location.getLongitude() + ""));
-        LocationServices.getFusedLocationProviderClient(this)
-            .requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
     }
 
     /*

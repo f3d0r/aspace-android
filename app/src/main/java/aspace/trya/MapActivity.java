@@ -617,5 +617,4 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             cityState.setText(result.getCityState());
         }
     }
-
 }

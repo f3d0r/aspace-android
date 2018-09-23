@@ -60,6 +60,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mypopsy.widget.FloatingSearchView;
+import com.mypopsy.widget.FloatingSearchView.OnIconClickListener;
 import com.steelkiwi.library.SlidingSquareLoaderView;
 import io.intercom.android.sdk.Intercom;
 import io.intercom.android.sdk.Intercom.Visibility;
@@ -141,7 +142,6 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         applicationState = new ApplicationState(MapActivity.this);
         beginLocation = applicationState.getLoadLocation();
-        Intercom.client().setLauncherVisibility(Visibility.VISIBLE);
 //        fgRouteSummaryBehavior = BottomSheetBehavior.from(fragmentRouteSummary);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
@@ -173,6 +173,13 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                 cvZoomInWarning.setAlpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0);
             }
             btCurrentLocation.setVisibility(focused ? View.INVISIBLE : View.VISIBLE);
+        });
+
+        floatingSearchView.setOnIconClickListener(new OnIconClickListener() {
+            @Override
+            public void onNavigationClick() {
+                Intercom.client().displayMessenger();
+            }
         });
 
         Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));

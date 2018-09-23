@@ -13,4 +13,6 @@ public interface MapboxService {
     Call<GeoJSON> getSearchSuggestions(@Path("search") String searchQuery,
         @Query("proximity") RetrofitLatLng latLng, @Query("country") String country,
         @Query("access_token") String accessToken, @Query("limit") int searchLimit);
+
+
 }

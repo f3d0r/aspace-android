@@ -52,18 +52,22 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import com.mapbox.api.geocoding.v5.GeocodingCriteria;
+import com.mapbox.api.geocoding.v5.MapboxGeocoding;
+import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapLongClickListener;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mypopsy.widget.FloatingSearchView;
 import com.mypopsy.widget.FloatingSearchView.OnIconClickListener;
 import com.steelkiwi.library.SlidingSquareLoaderView;
 import io.intercom.android.sdk.Intercom;
-import io.intercom.android.sdk.Intercom.Visibility;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -321,6 +325,48 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
             @Override
             public void onScaleEnd(@NonNull StandardScaleGestureDetector detector) {
+            }
+        });
+
+        mapboxMap.addOnMapLongClickListener(new OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(@NonNull LatLng point) {
+                RetrofitLatLng latLng = new RetrofitLatLng(point.getLatitude(),
+                    point.getLongitude());
+                Point searchLocationPoint = Point
+                    .fromLngLat(point.getLongitude(), point.getLatitude());
+
+                MapboxGeocoding client = MapboxGeocoding.builder()
+                    .accessToken(getString(R.string.mapbox_access_token))
+                    .query(searchLocationPoint)
+                    .geocodingTypes(GeocodingCriteria.TYPE_POI)
+                    .mode(GeocodingCriteria.MODE_PLACES)
+                    .build();
+
+                client.enqueueCall(new Callback<GeocodingResponse>() {
+                    @Override
+                    public void onResponse(Call<GeocodingResponse> call,
+                        Response<GeocodingResponse> response) {
+                        Point zoomCenter = response.body().features().get(0).center();
+                        mapUtils.zoomToLatLng(new LatLng(zoomCenter.coordinates().get(1),
+                            zoomCenter.coordinates().get(0)), 500);
+                        if (response.body().features().get(0) != null
+                            && response.body().features().get(0).properties() != null) {
+                            String address = response.body().features().get(0).properties()
+                                .get("address").toString();
+                            floatingSearchView
+                                .setText(address.substring(1, address.length() - 1));
+                        } else {
+                            floatingSearchView
+                                .setText(point.getLatitude() + ", " + point.getLongitude());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeocodingResponse> call, Throwable t) {
+
+                    }
+                });
             }
         });
 

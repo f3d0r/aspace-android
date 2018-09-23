@@ -49,8 +49,7 @@
             app:fsv_contentBackgroundColor="@android:color/white"
             app:fsv_icon="@drawable/ic_headphones"
             app:fsv_cornerRadius="3dp"
-            app:fsv_menu="@menu/searchview_menu"
-            app:logo="@drawable/conversation"/>
+            app:fsv_menu="@menu/searchview_menu"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/current_location_button"

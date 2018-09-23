@@ -61,6 +61,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mypopsy.widget.FloatingSearchView;
 import com.steelkiwi.library.SlidingSquareLoaderView;
+import io.intercom.android.sdk.Intercom;
+import io.intercom.android.sdk.Intercom.Visibility;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -139,7 +141,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         applicationState = new ApplicationState(MapActivity.this);
         beginLocation = applicationState.getLoadLocation();
-        fgRouteSummaryBehavior = BottomSheetBehavior.from(fragmentRouteSummary);
+        Intercom.client().setLauncherVisibility(Visibility.VISIBLE);
+//        fgRouteSummaryBehavior = BottomSheetBehavior.from(fragmentRouteSummary);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             new BroadcastReceiver() {

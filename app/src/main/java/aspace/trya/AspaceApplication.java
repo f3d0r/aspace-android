@@ -11,6 +11,5 @@ public class AspaceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Timber.d("INTITALIZED!");
     }
 }

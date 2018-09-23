@@ -3,6 +3,7 @@ package aspace.trya.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -20,7 +21,9 @@ import aspace.trya.misc.APIURLs;
 import aspace.trya.models.AuthResponse;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.hbb20.CountryCodePicker;
+import io.intercom.android.sdk.Intercom;
 import io.michaelrocks.libphonenumber.android.NumberParseException;
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import io.michaelrocks.libphonenumber.android.Phonenumber;
@@ -33,14 +36,18 @@ public class LoginPhoneFragment extends Fragment {
 
     @BindView(R.id.country_code_picker)
     CountryCodePicker countryCodePicker;
-    @BindView(R.id.loginButton)
-    Button loginButton;
+    @BindView(R.id.btn_login)
+    CardView loginButton;
     @BindView(R.id.et_phone_number)
     EditText phoneNumberEditText;
+    @BindView(R.id.btn_skip_login)
+    CardView skipLoginButton;
 
     private PhoneNumberUtil phoneNumberUtil;
 
     private OnApplicationStateListener mListener;
+
+    public String deviceId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -69,10 +76,17 @@ public class LoginPhoneFragment extends Fragment {
         mListener = null;
     }
 
+    @OnClick(R.id.btn_skip_login)
+    public void skipLogin(View view) {
+        Intercom.client().registerUnidentifiedUser();
+        mListener.skipLogin(deviceId);
+    }
+
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         phoneNumberEditText.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
         phoneNumberEditText.requestFocus();
+        deviceId = UUID.randomUUID().toString();
 
         loginButton.setOnClickListener(v -> {
             loginButton.setEnabled(false);
@@ -89,7 +103,6 @@ public class LoginPhoneFragment extends Fragment {
                 phoneNumberEditText.setError("Invalid phone #");
                 phoneNumberEditText.requestFocus();
             } else {
-                final String deviceId = UUID.randomUUID().toString();
 
                 Call<AuthResponse> call = RetrofitServiceGenerator
                     .createService(AspaceMainService.class,

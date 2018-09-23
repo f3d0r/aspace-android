@@ -60,6 +60,13 @@ public class LoginActivity extends AppCompatActivity implements OnApplicationSta
     }
 
     @Override
+    public void skipLogin(String deviceId) {
+        applicationState.put("DEVICE_ID", deviceId);
+        startActivity(new Intent(LoginActivity.this, MapActivity.class));
+        finish();
+    }
+
+    @Override
     public void continueFromLogin(AccessCode accessCode) {
         applicationStateModifier.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode,
             applicationState.get("DEVICE_ID"));

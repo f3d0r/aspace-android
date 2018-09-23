@@ -23,6 +23,7 @@ public final class ApplicationState {
 
     public ApplicationState(Activity activity) {
         Timber.d("INITIALIZATION of appstate");
+        Intercom.initialize(activity.getApplication(), "android_sdk-ef40ec0bcc5435e6f1c9f704d0555c30131e3f3f", "ug14xn21");
         new Instabug.Builder(activity.getApplication(), "a19c3dd621014856ad58f1c3a2ab0db1")
             .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
             .build();
@@ -31,7 +32,6 @@ public final class ApplicationState {
     }
 
     public void logout() {
-//        Intercom.client().logout();
         prefs.edit().remove(LOGIN_PHONE_NUMBER).apply();
         prefs.edit().remove(DEVICE_ID).apply();
         prefs.edit().remove(ACCESS_CODE).apply();
@@ -39,8 +39,8 @@ public final class ApplicationState {
 
     public void login(String phoneNumber, AccessCode accessCode, String deviceId) {
         logout();
-//        Registration registration = Registration.create().with(phoneNumber);
-//        Timber.d()
+        Registration registration = Registration.create().withUserId(phoneNumber);
+        Intercom.client().registerIdentifiedUser(registration);
 
         prefs.edit().putString(LOGIN_PHONE_NUMBER, phoneNumber).apply();
         prefs.edit().putString(DEVICE_ID, deviceId).apply();

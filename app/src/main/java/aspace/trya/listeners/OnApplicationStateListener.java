@@ -8,5 +8,7 @@ public interface OnApplicationStateListener {
 
     void pinExpired();
 
+    void skipLogin(String deviceId);
+
     void continueFromLogin(AccessCode accessCode);
 }

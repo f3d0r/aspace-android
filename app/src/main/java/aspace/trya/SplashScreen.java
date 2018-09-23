@@ -14,8 +14,6 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.widget.Toast;
 import aspace.trya.api.AspaceMainService;
 import aspace.trya.api.RetrofitServiceGenerator;
 import aspace.trya.misc.APIURLs;
@@ -30,12 +28,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -119,6 +114,7 @@ public class SplashScreen extends Activity {
         loadLibraries();
     }
 
+    @SuppressLint("MissingPermission")
     private void initLocation() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mSettingsClient = LocationServices.getSettingsClient(this);
@@ -130,6 +126,11 @@ public class SplashScreen extends Activity {
                 // location is received
                 mCurrentLocation = locationResult.getLastLocation();
 
+                if (!locationReceived) {
+                    locationReceived = true;
+                    checkUserLoggedIn(mCurrentLocation.getLatitude() + "",
+                        mCurrentLocation.getLongitude() + "");
+                }
             }
         };
 
@@ -189,51 +190,41 @@ public class SplashScreen extends Activity {
         finish();
     }
 
+    @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         mSettingsClient
             .checkLocationSettings(mLocationSettingsRequest)
-            .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-                @SuppressLint("MissingPermission")
-                @Override
-                public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                    Log.i("TAG", "All location settings are satisfied.");
+            .addOnSuccessListener(this, locationSettingsResponse -> {
+                // All location settings are satisfied.
 
-                    Toast.makeText(getApplicationContext(), "Started location updates!",
-                        Toast.LENGTH_SHORT).show();
-
-                    //noinspection MissingPermission
-                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                        mLocationCallback, Looper.myLooper());
-                }
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback, Looper.myLooper());
             })
-            .addOnFailureListener(this, new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    int statusCode = ((ApiException) e).getStatusCode();
-                    switch (statusCode) {
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            Log.i("TAG",
-                                "Location settings are not satisfied. Attempting to upgrade " +
-                                    "location settings ");
-                            try {
-                                // Show the dialog by calling startResolutionForResult(), and check the
-                                // result in onActivityResult().
-                                ResolvableApiException rae = (ResolvableApiException) e;
-                                rae.startResolutionForResult(SplashScreen.this,
-                                    REQUEST_CHECK_SETTINGS);
-                            } catch (IntentSender.SendIntentException sie) {
-                                Log.i("TAG", "PendingIntent unable to execute request.");
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            String errorMessage =
-                                "Location settings are inadequate, and cannot be " +
-                                    "fixed here. Fix in Settings.";
-                            Log.e("TAG", errorMessage);
-
-                            Toast.makeText(SplashScreen.this, errorMessage, Toast.LENGTH_LONG)
-                                .show();
-                    }
+            .addOnFailureListener(this, e -> {
+                int statusCode = ((ApiException) e).getStatusCode();
+                switch (statusCode) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+//                            Location settings are not satisfied. Attempting to upgrade location settings
+                        try {
+                            // Show the dialog by calling startResolutionForResult(), and check the
+                            // result in onActivityResult().
+                            ResolvableApiException rae = (ResolvableApiException) e;
+                            rae.startResolutionForResult(SplashScreen.this,
+                                REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException sie) {
+                            // PendingIntent unable to execute request
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+//                        "Location settings are inadequate, and cannot be fixed here. Fix in Settings."
+                }
+            });
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(
+            location -> {
+                if (!locationReceived && location != null) {
+                    locationReceived = true;
+                    checkUserLoggedIn(location.getLatitude() + "",
+                        location.getLongitude() + "");
                 }
             });
     }
@@ -245,8 +236,7 @@ public class SplashScreen extends Activity {
             .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    Toast.makeText(getApplicationContext(), "Location updates stopped!",
-                        Toast.LENGTH_SHORT).show();
+                    // Location updates stopped!
                 }
             });
     }
@@ -258,11 +248,11 @@ public class SplashScreen extends Activity {
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        Log.e("TAG", "User agreed to make required location settings changes.");
+                        // User agreed to make required location settings changes
                         // Nothing to do. startLocationupdates() gets called in onResume again.
                         break;
                     case Activity.RESULT_CANCELED:
-                        Log.e("TAG", "User chose not to make required location settings changes.");
+                        // User chose not to make required location settings changes.
                         mRequestingLocationUpdates = false;
                         break;
                 }

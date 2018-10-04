@@ -16,16 +16,25 @@ public interface AspaceRoutingService {
     @POST("get_drive_bike_route")
     Observable<RouteOptionsResponse> getDriveBikeRoute(@Query("origin_lat") double originLat,
         @Query("origin_lng") double originLng, @Query("dest_lat") double destLat,
-        @Query("dest_lng") double destLng);
+        @Query("dest_lng") double destLng, @Query("session_starting") int sessionStarting,
+        @Query("access_code") String accessCode, @Query("device_id") String deviceId);
 
     @POST("get_drive_walk_route")
     Observable<RouteOptionsResponse> getDriveWalkWaypoints(@Query("origin_lat") double originLat,
         @Query("origin_lng") double originLng, @Query("dest_lat") double destLat,
-        @Query("dest_lng") double destLng);
+        @Query("dest_lng") double destLng, @Query("session_starting") int sessionStarting,
+        @Query("access_code") String accessCode, @Query("device_id") String deviceId);
 
     @POST("get_drive_direct_route")
     Observable<RouteOptionsResponse> getDriveDirectRoute(@Query("origin_lat") double originLat,
         @Query("origin_lng") double originLng, @Query("dest_lat") double destLat,
-        @Query("dest_lng") double destLng);
+        @Query("dest_lng") double destLng, @Query("session_starting") int sessionStarting,
+        @Query("access_code") String accessCode, @Query("device_id") String deviceId);
+
+    @POST("get_drive_direct_route")
+    Call<RouteOptionsResponse> testReq(@Query("origin_lat") double originLat,
+        @Query("origin_lng") double originLng, @Query("dest_lat") double destLat,
+        @Query("dest_lng") double destLng, @Query("session_starting") int sessionStarting,
+        @Query("access_code") String accessCode, @Query("device_id") String deviceId);
 
 }

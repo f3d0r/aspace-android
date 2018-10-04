@@ -1,12 +1,15 @@
 package aspace.trya.models.osrm_directions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Geometry {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Geometry implements Serializable {
 
     @JsonProperty("coordinates")
     private List<List<Double>> coordinates;

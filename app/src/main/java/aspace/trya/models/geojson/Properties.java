@@ -2,9 +2,10 @@ package aspace.trya.models.geojson;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Properties {
+public class Properties implements Serializable {
 
     @JsonProperty("address")
     private String address;

@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.0'
         classpath 'io.realm:realm-gradle-plugin:5.4.0'
         classpath 'com.google.gms:google-services:4.1.0'
     }
@@ -31,6 +31,9 @@ allprojects {
             url "https://raw.github.com/laenger/maven-releases/master/releases"
         }
         mavenCentral()
+        maven {
+            url 'https://mapbox.bintray.com/mapbox'
+        }
     }
 }
 

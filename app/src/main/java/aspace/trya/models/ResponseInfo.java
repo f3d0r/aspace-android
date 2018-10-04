@@ -1,8 +1,9 @@
 package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-public class ResponseInfo {
+public class ResponseInfo implements Serializable {
 
     @JsonProperty("missing_parameter")
     private String missingParameter;

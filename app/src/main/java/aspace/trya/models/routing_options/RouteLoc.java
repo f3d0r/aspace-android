@@ -2,8 +2,9 @@ package aspace.trya.models.routing_options;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import java.io.Serializable;
 
-public class RouteLoc {
+public class RouteLoc implements Serializable {
 
     @JsonProperty("lng")
     private double lng;

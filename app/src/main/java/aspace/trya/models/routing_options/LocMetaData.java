@@ -1,8 +1,11 @@
 package aspace.trya.models.routing_options;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-public class LocMetaData {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class LocMetaData implements Serializable {
 
     @JsonProperty("bikes_available")
     private int bikesAvailable;
@@ -39,6 +42,21 @@ public class LocMetaData {
 
     @JsonProperty("parking_price")
     private double parkingPrice;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("payment_process")
+    private String paymentProcess;
+
+    @JsonProperty("address")
+    private String address;
+
+    @JsonProperty("payment_types")
+    private String paymentTypes;
+
+    @JsonProperty("facilities")
+    private String facilities;
 
     public int getBikesAvailable() {
         return bikesAvailable;
@@ -136,22 +154,66 @@ public class LocMetaData {
         this.parkingPrice = parkingPrice;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPaymentProcess() {
+        return paymentProcess;
+    }
+
+    public void setPaymentProcess(String paymentProcess) {
+        this.paymentProcess = paymentProcess;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPaymentTypes() {
+        return paymentTypes;
+    }
+
+    public void setPaymentTypes(String paymentTypes) {
+        this.paymentTypes = paymentTypes;
+    }
+
+    public String getFacilities() {
+        return facilities;
+    }
+
+    public void setFacilities(String facilities) {
+        this.facilities = facilities;
+    }
+
     @Override
     public String toString() {
-        return
-            "LocMetaData{" +
-                "bikes_available = '" + bikesAvailable + '\'' +
-                ",distance = '" + distance + '\'' +
-                ",num = '" + num + '\'' +
-                ",company = '" + company + '\'' +
-                ",id = '" + id + '\'' +
-                ",region = '" + region + '\'' +
-                ",type = '" + type + '\'' +
-                ",spot_id = '" + spotId + '\'' +
-                ",driving_time = '" + drivingTime + '\'' +
-                ",occupied = '" + occupied + '\'' +
-                ",block_id = '" + blockId + '\'' +
-                ",parking_price = '" + parkingPrice + '\'' +
-                "}";
+        return "LocMetaData{" +
+            "bikesAvailable=" + bikesAvailable +
+            ", distance=" + distance +
+            ", num='" + num + '\'' +
+            ", company='" + company + '\'' +
+            ", id='" + id + '\'' +
+            ", region='" + region + '\'' +
+            ", type='" + type + '\'' +
+            ", spotId=" + spotId +
+            ", drivingTime=" + drivingTime +
+            ", occupied='" + occupied + '\'' +
+            ", blockId=" + blockId +
+            ", parkingPrice=" + parkingPrice +
+            ", name='" + name + '\'' +
+            ", paymentProcess='" + paymentProcess + '\'' +
+            ", address='" + address + '\'' +
+            ", paymentTypes='" + paymentTypes + '\'' +
+            ", facilities='" + facilities + '\'' +
+            '}';
     }
 }

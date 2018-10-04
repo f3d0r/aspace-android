@@ -44,11 +44,11 @@
             android:divider="@android:color/white"
             android:dividerHeight="1dp"
             android:ellipsize="end"
-            android:hint="Where to?"
+            android:hint="@string/search_bar_hint"
             android:singleLine="true"
             app:fsv_contentBackgroundColor="@android:color/white"
-            app:fsv_icon="@drawable/ic_headphones"
             app:fsv_cornerRadius="3dp"
+            app:fsv_icon="@drawable/ic_headphones"
             app:fsv_menu="@menu/searchview_menu"/>
 
         <android.support.design.widget.FloatingActionButton
@@ -60,6 +60,18 @@
             android:layout_gravity="end|bottom"
             android:scaleType="center"
             android:src="@drawable/ic_current_location_disabled"
+            android:visibility="visible"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/start_navigation_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_gravity="end|bottom"
+            android:scaleType="center"
+            android:src="@drawable/ic_navigation"
+            android:tint="@android:color/black"
             android:visibility="invisible"/>
 
         <android.support.v7.widget.CardView
@@ -80,7 +92,7 @@
                 android:paddingBottom="3dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
-                android:text="Zoom in to view parking."/>
+                android:text="@string/parking_zoom_warn"/>
         </android.support.v7.widget.CardView>
     </FrameLayout>
 
@@ -96,18 +108,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
-        android:visibility="invisible"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/start_navigation_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_vertical_margin"
-        android:src="@drawable/ic_start_navigation"
-        android:tint="@android:color/white"
         android:visibility="invisible"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:layout_anchor="@+id/route_summary_fragment"
-        app:layout_anchorGravity="top|end"/>
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"/>
 
 </android.support.design.widget.CoordinatorLayout>

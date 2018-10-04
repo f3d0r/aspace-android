@@ -1,9 +1,10 @@
 package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
-public class ParkingResponse {
+public class ParkingResponse implements Serializable {
 
     @JsonProperty("res_info")
     private ResponseInfo responseInfo;

@@ -7,6 +7,8 @@ import aspace.trya.models.routing_options.RouteSegment;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -19,7 +21,9 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapUtils {
 
@@ -29,11 +33,14 @@ public class MapUtils {
     private List<Layer> layers;
     private List<Source> sources;
 
+    private HashMap<String, Marker> placedMarkers;
+
     public MapUtils(MapboxMap mapboxMap, Context context) {
         this.mapboxMap = mapboxMap;
         this.context = context;
         layers = new ArrayList<>();
         sources = new ArrayList<>();
+        placedMarkers = new HashMap<>();
     }
 
     public void zoomToLatLng(LatLng latLng, int animMilli) {
@@ -77,6 +84,7 @@ public class MapUtils {
         }
         layers.clear();
         sources.clear();
+        removeAllMarkers();
     }
 
     public void drawRoutes(RouteOptionsResponse routeOptionsResponse, int optionSelected) {
@@ -102,7 +110,24 @@ public class MapUtils {
                         PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                         PropertyFactory.lineWidth(4f),
                         PropertyFactory.lineColor(lineColor));
-
+                    addMarker("abs_origin", currentRouteSegment.getOrigin().getLatLng(),
+                        "Your Location", "");
+                    addMarker("park_loc", currentRouteSegment.getDest().getLatLng(),
+                        currentRouteSegment.getDest().getLocMetaData().getName(),
+                        currentRouteSegment.getDest().getLocMetaData().getAddress());
+                    break;
+                }
+                case "walk_bike": {
+                    int lineColor = context.getResources().getColor(R.color.routeWalkColor);
+                    routeLayer.setProperties(
+                        PropertyFactory.lineDasharray(new Float[]{0.01f, 2f}),
+                        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                        PropertyFactory.lineWidth(4f),
+                        PropertyFactory.lineColor(lineColor));
+                    addMarker("bike_loc", currentRouteSegment.getDest().getLatLng(),
+                        currentRouteSegment.getDest().getLocMetaData().getCompany(),
+                        currentRouteSegment.getDest().getLocMetaData().getId());
                     break;
                 }
                 case "bike_dest": {
@@ -112,7 +137,8 @@ public class MapUtils {
                         PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                         PropertyFactory.lineWidth(4f),
                         PropertyFactory.lineColor(lineColor));
-
+                    addMarker("abs_dest", currentRouteSegment.getDest().getLatLng(),
+                        "Your Destination", "");
                     break;
                 }
                 default: {
@@ -123,11 +149,31 @@ public class MapUtils {
                         PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                         PropertyFactory.lineWidth(4f),
                         PropertyFactory.lineColor(lineColor));
+                    addMarker("abs_dest", currentRouteSegment.getDest().getLatLng(),
+                        "Your Destination", "");
                     break;
                 }
             }
 
             addLayer(routeLayer, geoJsonSource);
         }
+    }
+
+    private void addMarker(String keyName, LatLng position, String title, String description) {
+        MarkerOptions marker = new MarkerOptions()
+            .position(position)
+            .title(title)
+            .snippet(description);
+        placedMarkers.put(keyName, mapboxMap.addMarker(marker));
+    }
+
+    private void removeAllMarkers() {
+        for (Map.Entry<String, Marker> entry : placedMarkers.entrySet()) {
+            mapboxMap.removeMarker(entry.getValue());
+        }
+    }
+
+    private void removeMarkerWithKey(String key) {
+        mapboxMap.removeMarker(placedMarkers.get(key));
     }
 }

@@ -1,9 +1,10 @@
 package aspace.trya.models.routing_options;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
-public class RouteOptions {
+public class RouteOptions implements Serializable {
 
     @JsonProperty("routes")
     private List<List<RouteSegment>> routes;

@@ -1,9 +1,12 @@
 package aspace.trya.models.osrm_directions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
-public class Intersection {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Intersection implements Serializable {
 
     @JsonProperty("entry")
     private List<Boolean> entry;
@@ -13,6 +16,9 @@ public class Intersection {
 
     @JsonProperty("in")
     private int in;
+
+    @JsonProperty("out")
+    private int out;
 
     @JsonProperty("location")
     private List<Double> location;

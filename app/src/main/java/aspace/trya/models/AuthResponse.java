@@ -1,8 +1,9 @@
 package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-public class AuthResponse {
+public class AuthResponse implements Serializable {
 
     @JsonProperty("res_info")
     private ResponseInfo responseInfo;

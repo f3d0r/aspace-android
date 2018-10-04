@@ -3,10 +3,11 @@ package aspace.trya.models.geojson;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import java.io.Serializable;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Geometry {
+public class Geometry implements Serializable {
 
     @JsonProperty("coordinates")
     private List<Double> coordinates;

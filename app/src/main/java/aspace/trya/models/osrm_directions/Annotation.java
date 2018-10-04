@@ -1,9 +1,12 @@
 package aspace.trya.models.osrm_directions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
-public class Annotation {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Annotation implements Serializable {
 
     @JsonProperty("duration")
     private List<Double> duration;

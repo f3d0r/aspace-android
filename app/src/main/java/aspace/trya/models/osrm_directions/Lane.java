@@ -1,9 +1,12 @@
 package aspace.trya.models.osrm_directions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
-public class Lane {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Lane implements Serializable {
 
     @JsonProperty("valid")
     private boolean valid;

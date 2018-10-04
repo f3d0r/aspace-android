@@ -3,4 +3,7 @@
     <string name="straight_to_map"><u>Go straight to map!</u></string>
 
     <string name="mapbox_access_token">***REMOVED***</string>
+
+    <string name="search_bar_hint">Where to?</string>
+    <string name="parking_zoom_warn">Zoom in to view parking.</string>
 </resources>

@@ -3,8 +3,9 @@ package aspace.trya.models.routing_options;
 import aspace.trya.models.osrm_directions.Directions;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import java.io.Serializable;
 
-public class RouteSegment {
+public class RouteSegment implements Serializable {
 
     @JsonProperty("pretty_name")
     private String prettyName;

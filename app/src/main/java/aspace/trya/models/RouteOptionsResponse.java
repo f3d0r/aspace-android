@@ -5,10 +5,11 @@ import aspace.trya.models.routing_options.RouteSegment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouteOptionsResponse {
+public class RouteOptionsResponse implements Serializable {
 
     @JsonProperty("res_info")
     private ResponseInfo resInfo;

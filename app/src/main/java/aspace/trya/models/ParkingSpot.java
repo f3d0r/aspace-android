@@ -1,6 +1,8 @@
 package aspace.trya.models;
 
-public class ParkingSpot {
+import java.io.Serializable;
+
+public class ParkingSpot implements Serializable {
 
     private double lng;
     private double distance;

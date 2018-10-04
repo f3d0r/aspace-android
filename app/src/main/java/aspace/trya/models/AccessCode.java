@@ -1,8 +1,9 @@
 package aspace.trya.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-public class AccessCode {
+public class AccessCode implements Serializable {
 
     @JsonProperty("access_code")
     public String accessCode;

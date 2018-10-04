@@ -1,9 +1,12 @@
 package aspace.trya.models.osrm_directions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
-public class Directions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Directions implements Serializable {
 
     @JsonProperty("routes")
     private List<Route> routes;
@@ -13,6 +16,15 @@ public class Directions {
 
     @JsonProperty("waypoints")
     private List<Waypoint> waypoints;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("statusCode")
+    private String statusCode;
+
+    @JsonProperty("message")
+    private String message;
 
     public List<Route> getRoutes() {
         return routes;

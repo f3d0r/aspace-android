@@ -28,11 +28,11 @@ public class RouteOptionsMapController {
                 .getLng(),
             routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(0).getOrigin()
                 .getLat());
-        currentDest = Point.fromLngLat(routeOptionsResponses[1].getRouteOptions().getRoutes().get(0)
-            .get(routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).size() - 1).getDest()
-            .getLng(), routeOptionsResponses[1].getRouteOptions().getRoutes().get(0)
-            .get(routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).size() - 1).getDest()
-            .getLat());
+        currentDest = Point.fromLngLat(
+            routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(0).getDest()
+                .getLng(),
+            routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(0).getDest()
+                .getLat());
         if (currentViewOptions[0]) {
             currentView++;
             if (currentView + 1 > routeOptionsResponses[0].getRouteOptions().getRoutes().get(0)
@@ -63,8 +63,8 @@ public class RouteOptionsMapController {
             routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).get(0).getOrigin()
                 .getLat());
         currentDest = Point.fromLngLat(
-            routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).get(1).getDest().getLng(),
-            routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).get(1).getDest()
+            routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).get(0).getDest().getLng(),
+            routeOptionsResponses[1].getRouteOptions().getRoutes().get(0).get(0).getDest()
                 .getLat());
         if (currentViewOptions[1]) {
             currentView++;
@@ -96,8 +96,8 @@ public class RouteOptionsMapController {
             routeOptionsResponses[2].getRouteOptions().getRoutes().get(0).get(0).getOrigin()
                 .getLat());
         currentDest = Point.fromLngLat(
-            routeOptionsResponses[2].getRouteOptions().getRoutes().get(0).get(1).getDest().getLng(),
-            routeOptionsResponses[2].getRouteOptions().getRoutes().get(0).get(1).getDest()
+            routeOptionsResponses[2].getRouteOptions().getRoutes().get(0).get(0).getDest().getLng(),
+            routeOptionsResponses[2].getRouteOptions().getRoutes().get(0).get(0).getDest()
                 .getLat());
         if (currentViewOptions[2]) {
             currentView++;
@@ -128,5 +128,39 @@ public class RouteOptionsMapController {
 
     public Point getCurrentDest() {
         return currentDest;
+    }
+
+    public void firstRouteCompleted() {
+        if (getEnabledRouteIndex() == 0) {
+            currentOrigin = Point.fromLngLat(
+                routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(2).getOrigin()
+                    .getLng(),
+                routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(2).getOrigin()
+                    .getLat());
+            currentDest = Point.fromLngLat(
+                routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(2).getDest()
+                    .getLng(),
+                routeOptionsResponses[0].getRouteOptions().getRoutes().get(0).get(2).getDest()
+                    .getLat());
+        } else {
+            currentOrigin = Point.fromLngLat(
+                routeOptionsResponses[getEnabledRouteIndex()].getRouteOptions().getRoutes().get(0).get(1).getOrigin()
+                    .getLng(),
+                routeOptionsResponses[getEnabledRouteIndex()].getRouteOptions().getRoutes().get(0).get(1).getOrigin()
+                    .getLat());
+            currentDest = Point.fromLngLat(
+                routeOptionsResponses[getEnabledRouteIndex()].getRouteOptions().getRoutes().get(0).get(1).getDest().getLng(),
+                routeOptionsResponses[getEnabledRouteIndex()].getRouteOptions().getRoutes().get(0).get(1).getDest()
+                    .getLat());
+        }
+    }
+
+    public int getEnabledRouteIndex() {
+        for (int i = 0; i < currentViewOptions.length; i++) {
+            if (currentViewOptions[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

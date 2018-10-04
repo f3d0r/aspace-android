@@ -107,6 +107,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     @BindView(R.id.start_navigation_button)
     FloatingActionButton btStartNavigation;
 
+    @BindView(R.id.go_to_limebike)
+    FloatingActionButton btnGoToLimebike;
+
     private MapboxMap mapboxMap;
 
     private SearchAdapter mAdapter;
@@ -118,6 +121,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
     private LatLng lastCurrentLocation;
 
     private MapUtils mapUtils;
+
+    private boolean firstRouteCompleted = false;
 
     //For Route Display (Defaults)
     private Feature routeOrigin;
@@ -174,6 +179,17 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             },
             2000
         );
+
+        btnGoToLimebike.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                firstRouteCompleted = true;
+                btnGoToLimebike.setVisibility(View.INVISIBLE);
+                btStartNavigation.setVisibility(View.VISIBLE);
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.limebike");
+                startActivity( launchIntent );
+            }
+        });
 
         floatingSearchView.setOnSearchFocusChangedListener(focused -> {
             floatingSearchView.getMenu().getItem(0)
@@ -274,18 +290,39 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         btStartNavigation.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                getRoute(routeOptionsMapController.getCurrentOrigin(),
-                    routeOptionsMapController.getCurrentDest(), new aspace.trya.misc.Callback() {
-                        @Override
-                        public void execute() {
-                            boolean simulateRoute = true;
-                            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                                .directionsRoute(currentRoute)
-                                .shouldSimulateRoute(simulateRoute)
-                                .build();
-                            NavigationLauncher.startNavigation(MapActivity.this, options);
-                        }
-                    });
+                if (!firstRouteCompleted) {
+                    btStartNavigation.setVisibility(View.INVISIBLE);
+                    btnGoToLimebike.setVisibility(View.VISIBLE);
+                    getRoute(routeOptionsMapController.getCurrentOrigin(),
+                        routeOptionsMapController.getCurrentDest(), new aspace.trya.misc.Callback() {
+                            @Override
+                            public void execute() {
+                                boolean simulateRoute = true;
+                                NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                                    .directionsRoute(currentRoute)
+                                    .shouldSimulateRoute(simulateRoute)
+                                    .build();
+                                NavigationLauncher.startNavigation(MapActivity.this, options);
+                                routeOptionsMapController.firstRouteCompleted();
+                            }
+                        });
+                } else {
+                    btnGoToLimebike.setVisibility(View.INVISIBLE);
+                    btStartNavigation.setVisibility(View.VISIBLE);
+                    getRoute(routeOptionsMapController.getCurrentOrigin(),
+                        routeOptionsMapController.getCurrentDest(), new aspace.trya.misc.Callback() {
+                            @Override
+                            public void execute() {
+                                boolean simulateRoute = true;
+                                NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                                    .directionsRoute(currentRoute)
+                                    .shouldSimulateRoute(simulateRoute)
+                                    .build();
+                                NavigationLauncher.startNavigation(MapActivity.this, options);
+                            }
+                        });
+                }
+
             }
         });
     }

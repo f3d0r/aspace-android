@@ -113,7 +113,7 @@ public class MapUtils {
                     addMarker("abs_origin", currentRouteSegment.getOrigin().getLatLng(),
                         "Your Location", "");
                     addMarker("park_loc", currentRouteSegment.getDest().getLatLng(),
-                        currentRouteSegment.getDest().getLocMetaData().getName(),
+                        currentRouteSegment.getDest().getLocMetaData().getName() + " ($" + (int) (currentRouteSegment.getDest().getLocMetaData().getParkingPrice()) + ")",
                         currentRouteSegment.getDest().getLocMetaData().getAddress());
                     break;
                 }
@@ -127,7 +127,8 @@ public class MapUtils {
                         PropertyFactory.lineColor(lineColor));
                     addMarker("bike_loc", currentRouteSegment.getDest().getLatLng(),
                         currentRouteSegment.getDest().getLocMetaData().getCompany(),
-                        currentRouteSegment.getDest().getLocMetaData().getId());
+                        currentRouteSegment.getDest().getLocMetaData().getNum()
+                    );
                     break;
                 }
                 case "bike_dest": {

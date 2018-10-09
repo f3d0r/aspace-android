@@ -1,5 +1,6 @@
 package aspace.trya.models;
 
+import aspace.trya.models.routing_options.RouteLoc;
 import aspace.trya.models.routing_options.RouteOptions;
 import aspace.trya.models.routing_options.RouteSegment;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,5 +53,18 @@ public class RouteOptionsResponse implements Serializable {
             latLngs.add(currentRouteSegment.getDest().getLatLng());
         }
         return new LatLngBounds.Builder().includes(latLngs).build();
+    }
+
+    public RouteLoc getAbsOrigin() {
+        return getRouteOptions().getRoutes().get(0).get(0).getOrigin();
+    }
+
+    public RouteLoc getAbsDest() {
+        return getRouteOptions().getRoutes().get(0)
+            .get(getRouteOptions().getRoutes().get(0).size() - 1).getDest();
+    }
+
+    public RouteLoc getParkLoc() {
+        return getRouteOptions().getRoutes().get(0).get(0).getDest();
     }
 }

@@ -1,6 +1,7 @@
 package aspace.trya.models.routing_options;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import java.io.Serializable;
 
@@ -41,6 +42,10 @@ public class RouteLoc implements Serializable {
 
     public LatLng getLatLng() {
         return new LatLng(lat, lng);
+    }
+
+    public Point getPoint() {
+        return Point.fromLngLat(getLng(), getLat());
     }
 
     @Override

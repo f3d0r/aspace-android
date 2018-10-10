@@ -9,7 +9,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import aspace.trya.R;
@@ -23,7 +22,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.hbb20.CountryCodePicker;
-import io.intercom.android.sdk.Intercom;
 import io.michaelrocks.libphonenumber.android.NumberParseException;
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import io.michaelrocks.libphonenumber.android.Phonenumber;
@@ -78,7 +76,6 @@ public class LoginPhoneFragment extends Fragment {
 
     @OnClick(R.id.btn_skip_login)
     public void skipLogin(View view) {
-        Intercom.client().registerUnidentifiedUser();
         mListener.skipLogin(deviceId);
     }
 
@@ -130,6 +127,8 @@ public class LoginPhoneFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
+                        Toast.makeText(getContext(), "Something went wrong... Please try again.",
+                            Toast.LENGTH_SHORT).show();
                     }
                 });
             }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +35,9 @@ public class LoginPinFragment extends Fragment {
     @BindView(R.id.buttonContinue)
     Button continueButton;
     @BindView(R.id.sendAgainButton)
-    TextView sendAgainTextView;
+    CardView sendAgainButton;
+    @BindView(R.id.sendAgainText)
+    TextView sendAgainText;
     @BindView(R.id.txt_pin_entry)
     PinEntryEditText pinEntryEditText;
 
@@ -120,7 +123,7 @@ public class LoginPinFragment extends Fragment {
 
         backButton.setOnClickListener(v -> mListener.pinExpired());
 
-        sendAgainTextView.setOnClickListener(v -> createResendPinTimer());
+        sendAgainText.setOnClickListener(v -> createResendPinTimer());
     }
 
     public void createResendPinTimer() {
@@ -128,14 +131,14 @@ public class LoginPinFragment extends Fragment {
         final String finalSendPinText = "Re-Send PIN";
         new CountDownTimer(30000, 1000) {
             public void onTick(long millisUntilFinished) {
-                sendAgainTextView.setEnabled(false);
+                sendAgainText.setEnabled(false);
                 String newButtonText = sendPinText + (millisUntilFinished / 1000);
-                sendAgainTextView.setText(newButtonText);
+                sendAgainText.setText(newButtonText);
             }
 
             public void onFinish() {
-                sendAgainTextView.setEnabled(true);
-                sendAgainTextView.setText(finalSendPinText);
+                sendAgainText.setEnabled(true);
+                sendAgainText.setText(finalSendPinText);
             }
         }.start();
     }

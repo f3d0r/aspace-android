@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity implements OnApplicationSta
 
     @Override
     public void phoneLoginToConfirm(String phoneNumber, String deviceId, boolean onboard) {
+        applicationStateModifier.logout();
         applicationState.put("LOGIN_PHONE_NUMBER", phoneNumber);
         applicationState.put("DEVICE_ID", deviceId);
         applicationState.put("ONBOARD", onboard + "");
@@ -62,6 +63,7 @@ public class LoginActivity extends AppCompatActivity implements OnApplicationSta
     @Override
     public void skipLogin(String deviceId) {
         applicationState.put("DEVICE_ID", deviceId);
+        applicationStateModifier.anonLogin(deviceId);
         startActivity(new Intent(LoginActivity.this, MapActivity.class));
         finish();
     }
@@ -70,11 +72,12 @@ public class LoginActivity extends AppCompatActivity implements OnApplicationSta
     public void continueFromLogin(AccessCode accessCode) {
         applicationStateModifier.login(applicationState.get("LOGIN_PHONE_NUMBER"), accessCode,
             applicationState.get("DEVICE_ID"));
-        if (applicationState.get("ONBOARD").equals("true")) {
-            startActivity(new Intent(LoginActivity.this, OnboardingActivity.class));
-        } else {
-            startActivity(new Intent(LoginActivity.this, MapActivity.class));
-        }
+        startActivity(new Intent(LoginActivity.this, MapActivity.class));
+//        if (applicationState.get("ONBOARD").equals("true")) {
+//            startActivity(new Intent(LoginActivity.this, OnboardingActivity.class));
+//        } else {
+//            startActivity(new Intent(LoginActivity.this, MapActivity.class));
+//        }
         finish();
     }
 }

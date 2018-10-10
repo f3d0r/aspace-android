@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.widget.Toast;
 import aspace.trya.api.AspaceMainService;
 import aspace.trya.api.RetrofitServiceGenerator;
 import aspace.trya.misc.APIURLs;
@@ -174,6 +175,8 @@ public class SplashScreen extends Activity {
                 @Override
                 public void onFailure(Call<CodeResponse> call, Throwable t) {
                     applicationState.logout();
+                    Toast.makeText(getApplicationContext(),
+                        "Something went wrong... Please try again.", Toast.LENGTH_SHORT).show();
                     getLocationAndSend(LoginActivity.class);
                 }
             });
@@ -204,6 +207,8 @@ public class SplashScreen extends Activity {
                 int statusCode = ((ApiException) e).getStatusCode();
                 switch (statusCode) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        Toast.makeText(getApplicationContext(),
+                            "Something went wrong... Please try again.", Toast.LENGTH_SHORT).show();
 //                            Location settings are not satisfied. Attempting to upgrade location settings
                         try {
                             // Show the dialog by calling startResolutionForResult(), and check the
@@ -216,6 +221,8 @@ public class SplashScreen extends Activity {
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Toast.makeText(getApplicationContext(),
+                            "Something went wrong... Please try again.", Toast.LENGTH_SHORT).show();
 //                        "Location settings are inadequate, and cannot be fixed here. Fix in Settings."
                 }
             });

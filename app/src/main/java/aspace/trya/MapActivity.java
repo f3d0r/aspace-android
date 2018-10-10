@@ -202,25 +202,12 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
         );
 
-//        new java.util.Timer().schedule(
-//            new java.util.TimerTask() {
-//                @Override
-//                public void run() {
-//                    lastCurrentLocation = currentLocationUpdates.getLatLng();
-//                    routeOrigin = new Feature(lastCurrentLocation, true);
-//                    if (locationTracked && mapboxMap != null) {
-//                        mapUtils.zoomToLatLng(lastCurrentLocation, 250);
-//                    }
-//                }
-//            },
-//            2000
-//        );
-
         fabNavMenu.setIconAnimated(false);
 
         fabNavBikeDest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intercom.client().logEvent("NAV_BIKE_STARTED");
                 firstRouteCompleted = true;
                 fabNavMenu.close(true);
                 getRoute(routeOptionsMapController.getBikeLoc().getPoint(), "Your Location",
@@ -257,6 +244,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         fabNavWalkDest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intercom.client().logEvent("NAV_WALK_STARTED");
                 firstRouteCompleted = true;
                 fabNavMenu.close(true);
                 getRoute(
@@ -286,6 +274,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         fabNavPark.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intercom.client().logEvent("NAV_PARK_STARTED");
                 firstRouteCompleted = true;
                 fabNavMenu.close(true);
                 getRoute(routeOptionsMapController.getAbsOrigin()
@@ -330,19 +319,13 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             }
         });
 
-        Mapbox.getInstance(
+        Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));
 
-            getApplicationContext(), getString(R.string.mapbox_access_token));
-
-        mapView =
-
-            findViewById(R.id.map_view);
+        mapView = findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        floatingSearchView.setAdapter(mAdapter = new
-
-            SearchAdapter());
+        floatingSearchView.setAdapter(mAdapter = new SearchAdapter());
         floatingSearchView.setOnSearchListener(text -> floatingSearchView.setActivated(false));
 
         floatingSearchView.addTextChangedListener(new TextWatcher() {
@@ -421,8 +404,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                                         public void onFailure(
                                             @NonNull Call<GeoJSON> call,
                                             Throwable t) {
-                                            Timber.w("THERE'S AN ERROR: ");
-                                            Timber.w(t);
+                                            Toast.makeText(getApplicationContext(),
+                                                "Something went wrong... Please try again.",
+                                                Toast.LENGTH_SHORT).show();
                                         }
                                     });
                             });
@@ -531,7 +515,9 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
                         @Override
                         public void onFailure(Call<GeocodingResponse> call, Throwable t) {
-
+                            Toast.makeText(getApplicationContext(),
+                                "Something went wrong... Please try again.", Toast.LENGTH_SHORT)
+                                .show();
                         }
                     });
                 }
@@ -760,7 +746,8 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
                 @Override
                 public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-                    Timber.d("Error: " + throwable.getMessage());
+                    Toast.makeText(getApplicationContext(),
+                        "Something went wrong... Please try again.", Toast.LENGTH_SHORT).show();
                 }
             });
     }

@@ -113,7 +113,9 @@ public class MapUtils {
                     addMarker("abs_origin", currentRouteSegment.getOrigin().getLatLng(),
                         "Your Location", "");
                     addMarker("park_loc", currentRouteSegment.getDest().getLatLng(),
-                        currentRouteSegment.getDest().getLocMetaData().getName() + " ($" + (int) (currentRouteSegment.getDest().getLocMetaData().getParkingPrice()) + ")",
+                        currentRouteSegment.getDest().getLocMetaData().getName() + " ($"
+                            + (int) (currentRouteSegment.getDest().getLocMetaData()
+                            .getParkingPrice()) + ")",
                         currentRouteSegment.getDest().getLocMetaData().getAddress());
                     break;
                 }

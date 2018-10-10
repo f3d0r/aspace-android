@@ -4,7 +4,7 @@ apply plugin: 'realm-android'
 
 ext.versionMajor = 0
 ext.versionMinor = 0
-ext.versionPatch = 2
+ext.versionPatch = 3
 ext.versionClassifier = null
 ext.isSnapshot = false
 ext.minimumSdkVersion = 21

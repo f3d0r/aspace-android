@@ -58,11 +58,11 @@ public final class ApplicationState {
     }
 
     public String getAccessCode() {
-        return prefs.getString(ACCESS_CODE, null);
+        return prefs.getString(ACCESS_CODE, "null");
     }
 
     public String getDeviceId() {
-        return prefs.getString(DEVICE_ID, null);
+        return prefs.getString(DEVICE_ID, "null");
     }
 
     public void setLoadLocation(String lat, String lng) {

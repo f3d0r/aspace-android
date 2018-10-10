@@ -75,7 +75,7 @@ public class MapUtils {
         sources.add(source);
     }
 
-    private void clearMap() {
+    public void clearMap() {
         for (Layer layer : layers) {
             mapboxMap.removeLayer(layer);
         }
@@ -172,6 +172,7 @@ public class MapUtils {
         for (Map.Entry<String, Marker> entry : placedMarkers.entrySet()) {
             mapboxMap.removeMarker(entry.getValue());
         }
+        placedMarkers.clear();
     }
 
     private void removeMarkerWithKey(String key) {

@@ -1,14 +1,22 @@
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
+
+ext.versionMajor = 0
+ext.versionMinor = 0
+ext.versionPatch = 1
+ext.versionClassifier = null
+ext.isSnapshot = false
+ext.minimumSdkVersion = 21
+
 android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "aspace.trya"
-        minSdkVersion 21
+        minSdkVersion project.ext.minimumSdkVersion
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode generateVersionCode()
+        versionName generateVersionName()
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -22,6 +30,22 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+}
+
+private Integer generateVersionCode() {
+    return ext.minimumSdkVersion * 10000000 + ext.versionMajor * 10000 + ext.versionMinor * 100 + ext.versionPatch
+}
+
+private String generateVersionName() {
+    String versionName = "${ext.versionMajor}.${ext.versionMinor}.${ext.versionPatch}"
+    if (ext.versionClassifier == null && ext.isSnapshot) {
+        ext.versionClassifier = "SNAPSHOT"
+    }
+
+    if (ext.versionClassifier != null) {
+        versionName += "-" + ext.versionClassifier
+    }
+    return versionName
 }
 
 realm {
@@ -87,7 +111,7 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.8.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:4.1.0-SNAPSHOT'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.20.0'
-    implementation ('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.20.0') {
+    implementation('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.20.0') {
         transitive = true
     }
 

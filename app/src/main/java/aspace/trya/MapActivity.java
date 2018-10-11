@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -33,7 +34,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -57,6 +57,7 @@ import aspace.trya.misc.CurrentLocationUpdates;
 import aspace.trya.misc.KeyboardUtils;
 import aspace.trya.misc.LocationMonitoringService;
 import aspace.trya.misc.MapUtils;
+import aspace.trya.models.MapConstraintsResponse;
 import aspace.trya.models.RouteOptionsResponse;
 import aspace.trya.models.geojson.Feature;
 import aspace.trya.models.geojson.GeoJSON;
@@ -75,19 +76,19 @@ import com.mapbox.api.geocoding.v5.MapboxGeocoding;
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Polygon;
+import com.mapbox.mapboxsdk.annotations.PolygonOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapLongClickListener;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mypopsy.widget.FloatingSearchView;
-import com.mypopsy.widget.FloatingSearchView.OnIconClickListener;
 import com.steelkiwi.library.SlidingSquareLoaderView;
 import io.intercom.android.sdk.Intercom;
 import io.reactivex.Observable;
@@ -95,6 +96,8 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import retrofit2.Call;
@@ -204,101 +207,83 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
 
         fabNavMenu.setIconAnimated(false);
 
-        fabNavBikeDest.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intercom.client().logEvent("NAV_BIKE_STARTED");
-                firstRouteCompleted = true;
-                fabNavMenu.close(true);
-                getRoute(routeOptionsMapController.getBikeLoc().getPoint(), "Your Location",
-                    routeOptionsMapController.getAbsDest().getPoint(), "Your Destination",
-                    new aspace.trya.misc.Callback() {
-                        @Override
-                        public void execute() {
-                            try {
-                                Intent launchIntent = getPackageManager()
-                                    .getLaunchIntentForPackage("com.limebike");
-                                startActivity(launchIntent);
-                                boolean simulateRoute = false;
-                                NavigationLauncherOptions options = NavigationLauncherOptions
-                                    .builder()
-                                    .directionsRoute(currentRoute)
-                                    .shouldSimulateRoute(simulateRoute)
-                                    .build();
-                                NavigationLauncher
-                                    .startNavigation(MapActivity.this, options);
-                            } catch (Exception e) {
-                                try {
-                                    startActivity(new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse("market://details?id=com.limebike")));
-                                } catch (android.content.ActivityNotFoundException anfe) {
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-                                        "https://play.google.com/store/apps/details?id=com.limebike&hl=en_US")));
-                                }
-                            }
+        fabNavBikeDest.setOnClickListener(view -> {
+            Intercom.client().logEvent("NAV_BIKE_STARTED");
+            firstRouteCompleted = true;
+            fabNavMenu.close(true);
+            getRoute(routeOptionsMapController.getBikeLoc().getPoint(), "Your Location",
+                routeOptionsMapController.getAbsDest().getPoint(), "Your Destination",
+                () -> {
+                    try {
+                        Intent launchIntent = getPackageManager()
+                            .getLaunchIntentForPackage("com.limebike");
+                        startActivity(launchIntent);
+                        boolean simulateRoute = false;
+                        NavigationLauncherOptions options = NavigationLauncherOptions
+                            .builder()
+                            .directionsRoute(currentRoute)
+                            .shouldSimulateRoute(simulateRoute)
+                            .build();
+                        NavigationLauncher
+                            .startNavigation(MapActivity.this, options);
+                    } catch (Exception e) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("market://details?id=com.limebike")));
+                        } catch (android.content.ActivityNotFoundException anfe) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+                                "https://play.google.com/store/apps/details?id=com.limebike&hl=en_US")));
                         }
-                    });
-            }
+                    }
+                });
         });
 
-        fabNavWalkDest.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intercom.client().logEvent("NAV_WALK_STARTED");
-                firstRouteCompleted = true;
-                fabNavMenu.close(true);
-                getRoute(
-                    routeOptionsMapController.getParkLoc()
-                        .getPoint(), "Your Origin",
-                    routeOptionsMapController.getAbsDest()
-                        .getPoint(), "Your Destination",
-                    new aspace.trya.misc.Callback() {
-                        @Override
-                        public void execute() {
-                            boolean simulateRoute = false;
-                            NavigationLauncherOptions options = NavigationLauncherOptions
-                                .builder()
-                                .directionsRoute(currentRoute)
-                                .shouldSimulateRoute(
-                                    simulateRoute)
-                                .build();
-                            NavigationLauncher
-                                .startNavigation(
-                                    MapActivity.this,
-                                    options);
-                        }
-                    });
-            }
+        fabNavWalkDest.setOnClickListener(view -> {
+            Intercom.client().logEvent("NAV_WALK_STARTED");
+            firstRouteCompleted = true;
+            fabNavMenu.close(true);
+            getRoute(
+                routeOptionsMapController.getParkLoc()
+                    .getPoint(), "Your Origin",
+                routeOptionsMapController.getAbsDest()
+                    .getPoint(), "Your Destination",
+                () -> {
+                    boolean simulateRoute = false;
+                    NavigationLauncherOptions options = NavigationLauncherOptions
+                        .builder()
+                        .directionsRoute(currentRoute)
+                        .shouldSimulateRoute(
+                            simulateRoute)
+                        .build();
+                    NavigationLauncher
+                        .startNavigation(
+                            MapActivity.this,
+                            options);
+                });
         });
 
-        fabNavPark.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intercom.client().logEvent("NAV_PARK_STARTED");
-                firstRouteCompleted = true;
-                fabNavMenu.close(true);
-                getRoute(routeOptionsMapController.getAbsOrigin()
-                        .getPoint(), "Your Location",
-                    routeOptionsMapController.getParkLoc()
-                        .getPoint(),
-                    routeOptionsMapController.getParkLoc()
-                        .getLocMetaData().getName(),
-                    new aspace.trya.misc.Callback() {
-                        @Override
-                        public void execute() {
-                            boolean simulateRoute = false;
-                            NavigationLauncherOptions options = NavigationLauncherOptions
-                                .builder()
-                                .directionsRoute(currentRoute)
-                                .shouldSimulateRoute(
-                                    simulateRoute)
-                                .build();
-                            NavigationLauncher
-                                .startNavigation(MapActivity.this,
-                                    options);
-                        }
-                    });
-            }
+        fabNavPark.setOnClickListener(view -> {
+            Intercom.client().logEvent("NAV_PARK_STARTED");
+            firstRouteCompleted = true;
+            fabNavMenu.close(true);
+            getRoute(routeOptionsMapController.getAbsOrigin()
+                    .getPoint(), "Your Location",
+                routeOptionsMapController.getParkLoc()
+                    .getPoint(),
+                routeOptionsMapController.getParkLoc()
+                    .getLocMetaData().getName(),
+                () -> {
+                    boolean simulateRoute = false;
+                    NavigationLauncherOptions options = NavigationLauncherOptions
+                        .builder()
+                        .directionsRoute(currentRoute)
+                        .shouldSimulateRoute(
+                            simulateRoute)
+                        .build();
+                    NavigationLauncher
+                        .startNavigation(MapActivity.this,
+                            options);
+                });
         });
 
         floatingSearchView.setOnSearchFocusChangedListener(focused ->
@@ -306,18 +291,13 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
         {
             floatingSearchView.getMenu().getItem(0)
                 .setVisible(floatingSearchView.getText().toString().trim().length() != 0);
-            if (cvZoomInWarningVisible) {
+//            if (cvZoomInWarningVisible) {
 //                cvZoomInWarning.setAlpha(mapboxMap.getCameraPosition().zoom < 15 ? 1 : 0);
-            }
+//            }
             btCurrentLocation.setVisibility(focused ? View.INVISIBLE : View.VISIBLE);
         });
 
-        floatingSearchView.setOnIconClickListener(new OnIconClickListener() {
-            @Override
-            public void onNavigationClick() {
-                Intercom.client().displayMessenger();
-            }
-        });
+        floatingSearchView.setOnIconClickListener(() -> Intercom.client().displayMessenger());
 
         Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));
 
@@ -478,26 +458,25 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             }
         });
 
-        mapboxMap.addOnMapLongClickListener(new OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(@NonNull LatLng point) {
-                if (!displayingRoute) {
-                    RetrofitLatLng latLng = new RetrofitLatLng(point.getLatitude(),
-                        point.getLongitude());
-                    Point searchLocationPoint = Point
-                        .fromLngLat(point.getLongitude(), point.getLatitude());
+        mapboxMap.addOnMapLongClickListener(point -> {
+            if (!displayingRoute) {
+                RetrofitLatLng latLng = new RetrofitLatLng(point.getLatitude(),
+                    point.getLongitude());
+                Point searchLocationPoint = Point
+                    .fromLngLat(point.getLongitude(), point.getLatitude());
 
-                    MapboxGeocoding client = MapboxGeocoding.builder()
-                        .accessToken(getString(R.string.mapbox_access_token))
-                        .query(searchLocationPoint)
-                        .geocodingTypes(GeocodingCriteria.TYPE_POI)
-                        .mode(GeocodingCriteria.MODE_PLACES)
-                        .build();
+                MapboxGeocoding client = MapboxGeocoding.builder()
+                    .accessToken(getString(R.string.mapbox_access_token))
+                    .query(searchLocationPoint)
+                    .geocodingTypes(GeocodingCriteria.TYPE_POI)
+                    .mode(GeocodingCriteria.MODE_PLACES)
+                    .build();
 
-                    client.enqueueCall(new Callback<GeocodingResponse>() {
-                        @Override
-                        public void onResponse(Call<GeocodingResponse> call,
-                            Response<GeocodingResponse> response) {
+                client.enqueueCall(new Callback<GeocodingResponse>() {
+                    @Override
+                    public void onResponse(Call<GeocodingResponse> call,
+                        Response<GeocodingResponse> response) {
+                        try {
                             Point zoomCenter = response.body().features().get(0).center();
                             mapUtils.zoomToLatLng(new LatLng(zoomCenter.coordinates().get(1),
                                 zoomCenter.coordinates().get(0)), 500);
@@ -511,19 +490,58 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                                 floatingSearchView
                                     .setText(point.getLatitude() + ", " + point.getLongitude());
                             }
-                        }
-
-                        @Override
-                        public void onFailure(Call<GeocodingResponse> call, Throwable t) {
+                        } catch (Exception e) {
                             Toast.makeText(getApplicationContext(),
-                                "Something went wrong... Please try again.", Toast.LENGTH_SHORT)
-                                .show();
+                                "Nothing found here, please enter an address.",
+                                Toast.LENGTH_LONG).show();
                         }
-                    });
-                }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeocodingResponse> call, Throwable t) {
+                        Toast.makeText(getApplicationContext(),
+                            "Something went wrong... Please try again.", Toast.LENGTH_SHORT)
+                            .show();
+                    }
+                });
             }
         });
         mapboxMap.addOnMapClickListener(point -> btCurrentLocation.setVisibility(View.VISIBLE));
+
+        List<LatLng> worldPolygon = new ArrayList<>();
+        worldPolygon.add(new LatLng(-90, -180));
+        worldPolygon.add(new LatLng(90, -180));
+        worldPolygon.add(new LatLng(90, 180));
+        worldPolygon.add(new LatLng(-90, 180));
+        worldPolygon.add(new LatLng(-90, -180));
+
+        RetrofitServiceGenerator
+            .createService(AspaceRoutingService.class, APIURLs.ASPACE_ROUTING_PROD_URL)
+            .getMapConstraints()
+            .enqueue(
+                new Callback<MapConstraintsResponse>() {
+                    @Override
+                    public void onResponse(Call<MapConstraintsResponse> call,
+                        Response<MapConstraintsResponse> response) {
+                        Timber.w("URL : %s", call.request().url());
+                        List<LatLng> mainHole = response.body().getGeoJSON().getFeatures().get(0)
+                            .getGeometry().getLatLngs();
+                        List<List<LatLng>> allHoles = new ArrayList<>();
+                        allHoles.add(mainHole);
+                        Polygon polygon = mapboxMap.addPolygon(new PolygonOptions()
+                            .addAll(worldPolygon)
+                            .addAllHoles(allHoles)
+                            .fillColor(Color.parseColor("#3bb2d0"))
+                            .alpha(0.5f));
+                    }
+
+                    @Override
+                    public void onFailure(Call<MapConstraintsResponse> call, Throwable t) {
+                        Timber.w("URL : %s", call.request().url());
+                        Timber.w("ERROR: ");
+                        Timber.w(t);
+                    }
+                });
     }
 
     @Override
@@ -790,14 +808,10 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
             floatingSearchView.setVisibility(View.VISIBLE);
             loadingSquareView.hide();
             toggleSearchViewVisible(true,
-                new aspace.trya.misc.Callback() {
-                    @Override
-                    public void execute() {
-                        btCurrentLocation.setVisibility(View.VISIBLE);
-                        floatingSearchView.requestFocus();
-                        floatingSearchView.setActivated(true);
-                    }
-
+                () -> {
+                    btCurrentLocation.setVisibility(View.VISIBLE);
+                    floatingSearchView.requestFocus();
+                    floatingSearchView.setActivated(true);
                 });
             fabNavMenu.setVisibility(View.INVISIBLE);
             getSupportFragmentManager().beginTransaction().
@@ -926,12 +940,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                                     floatingSearchView.setVisibility(View.VISIBLE);
                                     loadingSquareView.hide();
                                     toggleSearchViewVisible(true,
-                                        new aspace.trya.misc.Callback() {
-                                            @Override
-                                            public void execute() {
-                                                btCurrentLocation.setVisibility(View.VISIBLE);
-                                            }
-                                        });
+                                        () -> btCurrentLocation.setVisibility(View.VISIBLE));
                                 } else {
                                     Toast.makeText(getApplicationContext(),
                                         "An error occured, please try again..",
@@ -939,12 +948,7 @@ public class MapActivity extends AppCompatActivity implements RouteOptionsListen
                                     floatingSearchView.setVisibility(View.VISIBLE);
                                     loadingSquareView.hide();
                                     toggleSearchViewVisible(true,
-                                        new aspace.trya.misc.Callback() {
-                                            @Override
-                                            public void execute() {
-                                                btCurrentLocation.setVisibility(View.VISIBLE);
-                                            }
-                                        });
+                                        () -> btCurrentLocation.setVisibility(View.VISIBLE));
                                 }
                                 Timber.w(e);
                             }

@@ -88,49 +88,57 @@ public class LoginPhoneFragment extends Fragment {
         loginButton.setOnClickListener(v -> {
             loginButton.setEnabled(false);
             Phonenumber.PhoneNumber phoneNumber;
-            try {
-                phoneNumber = phoneNumberUtil.parse(phoneNumberEditText.getText().toString(), "US");
-            } catch (NumberParseException e) {
-                phoneNumberEditText.setError("Invalid phone #");
-                phoneNumberEditText.requestFocus();
-                return;
-            }
+            if (phoneNumberEditText.getText().toString().length() >= 10) {
+                try {
+                    phoneNumber = phoneNumberUtil
+                        .parse(phoneNumberEditText.getText().toString(), "US");
+                } catch (NumberParseException e) {
+                    phoneNumberEditText.setError("Invalid phone #");
+                    phoneNumberEditText.requestFocus();
+                    return;
+                }
+                if (!phoneNumberUtil.isValidNumber(phoneNumber)) {
+                    phoneNumberEditText.setError("Invalid phone #");
+                    phoneNumberEditText.requestFocus();
+                } else {
 
-            if (!phoneNumberUtil.isValidNumber(phoneNumber)) {
-                phoneNumberEditText.setError("Invalid phone #");
-                phoneNumberEditText.requestFocus();
-            } else {
-
-                Call<AuthResponse> call = RetrofitServiceGenerator
-                    .createService(AspaceMainService.class,
-                        APIURLs.ASPACE_MAIN_PROD_URL)
-                    .phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
-                call.enqueue(new Callback<AuthResponse>() {
-                    @Override
-                    public void onResponse(Call<AuthResponse> call,
-                        Response<AuthResponse> response) {
-                        int responseCode = response.body().getResponseCode();
-                        if (responseCode == AspaceResponseCodes.INVALID_PHONE) {
-                            phoneNumberEditText.setError("Invalid phone #");
-                            phoneNumberEditText.requestFocus();
-                        } else if (responseCode == AspaceResponseCodes.NEW_PHONE
-                            || responseCode == AspaceResponseCodes.RETURNING_PHONE) {
-                            mListener.phoneLoginToConfirm(phoneNumberEditText.getText().toString(),
-                                deviceId,
-                                response.body().getResponseCode() == AspaceResponseCodes.NEW_PHONE);
-                        } else {
-                            Toast.makeText(getContext(),
-                                "Something went wrong, please restart the app.",
-                                Toast.LENGTH_SHORT).show();
+                    Call<AuthResponse> call = RetrofitServiceGenerator
+                        .createService(AspaceMainService.class,
+                            APIURLs.ASPACE_MAIN_PROD_URL)
+                        .phoneLogin(phoneNumberEditText.getText().toString(), deviceId, "F");
+                    call.enqueue(new Callback<AuthResponse>() {
+                        @Override
+                        public void onResponse(Call<AuthResponse> call,
+                            Response<AuthResponse> response) {
+                            int responseCode = response.body().getResponseCode();
+                            if (responseCode == AspaceResponseCodes.INVALID_PHONE) {
+                                phoneNumberEditText.setError("Invalid phone #");
+                                phoneNumberEditText.requestFocus();
+                            } else if (responseCode == AspaceResponseCodes.NEW_PHONE
+                                || responseCode == AspaceResponseCodes.RETURNING_PHONE) {
+                                mListener
+                                    .phoneLoginToConfirm(phoneNumberEditText.getText().toString(),
+                                        deviceId,
+                                        response.body().getResponseCode()
+                                            == AspaceResponseCodes.NEW_PHONE);
+                            } else {
+                                Toast.makeText(getContext(),
+                                    "Something went wrong, please restart the app.",
+                                    Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<AuthResponse> call, Throwable t) {
-                        Toast.makeText(getContext(), "Something went wrong... Please try again.",
-                            Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onFailure(Call<AuthResponse> call, Throwable t) {
+                            Toast
+                                .makeText(getContext(), "Something went wrong... Please try again.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } else {
+                phoneNumberEditText.setError("Invalid phone #");
+                phoneNumberEditText.requestFocus();
             }
         });
     }

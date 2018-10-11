@@ -4,6 +4,7 @@ import android.content.Context;
 import aspace.trya.search.SearchResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,5 +73,13 @@ public class GeoJSON implements Serializable {
             searchResults.add(new SearchResult(currentFeature, context));
         }
         return searchResults;
+    }
+
+    public List<LatLng> getAllLatLngs() {
+        List<LatLng> latLngs = new ArrayList<>();
+        for (Feature currentFeature : features) {
+            latLngs.add(currentFeature.getLatLng());
+        }
+        return latLngs;
     }
 }

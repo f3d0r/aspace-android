@@ -1,5 +1,6 @@
 package aspace.trya.api;
 
+import aspace.trya.models.MapConstraintsResponse;
 import aspace.trya.models.RouteOptionsResponse;
 import io.reactivex.Observable;
 import retrofit2.Call;
@@ -36,5 +37,8 @@ public interface AspaceRoutingService {
         @Query("origin_lng") double originLng, @Query("dest_lat") double destLat,
         @Query("dest_lng") double destLng, @Query("session_starting") int sessionStarting,
         @Query("access_code") String accessCode, @Query("device_id") String deviceId);
+
+    @GET("get_routing_map_constraints")
+    Call<MapConstraintsResponse> getMapConstraints();
 
 }
